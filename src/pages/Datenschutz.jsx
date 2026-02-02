@@ -1,4 +1,3 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "@/components/useTranslations";
@@ -26,7 +25,7 @@ const translations = {
     rights_answer: "You have the right to receive information about the origin, recipient and purpose of your stored personal data free of charge at any time. You also have the right to request the correction or deletion of this data. If you have given your consent to data processing, you can revoke this consent at any time for the future. You also have the right to request the restriction of the processing of your personal data under certain circumstances. Furthermore, you have the right to lodge a complaint with the competent supervisory authority.",
     
     hosting_title: "2. Hosting",
-    hosting_text: "This website is hosted on the base44 platform. The provider is base44.com . When you visit this website, the host automatically collects and stores various information in so-called server log files that your browser automatically transmits. For details on the host's data protection practices, please see:",
+    hosting_text: "This website is hosted on the base44 platform. The provider is Base44, Inc. When you visit this website, the host automatically collects and stores various information in so-called server log files that your browser automatically transmits. For details on the host's data protection practices, please see:",
     
     controller_title: "3. Information about the Responsible Party",
     controller_text: "The responsible party for data processing on this website is:",
@@ -63,7 +62,7 @@ const translations = {
     
     contact_rights: "To exercise your rights, please contact us at:",
     
-    last_updated: "Last updated: January 2025"
+    last_updated: "Last updated: February 2026"
   },
   de: {
     title: "Datenschutzerklärung",
@@ -87,7 +86,7 @@ const translations = {
     rights_answer: "Sie haben jederzeit das Recht, unentgeltlich Auskunft über Herkunft, Empfänger und Zweck Ihrer gespeicherten personenbezogenen Daten zu erhalten. Sie haben außerdem ein Recht, die Berichtigung oder Löschung dieser Daten zu verlangen. Wenn Sie eine Einwilligung zur Datenverarbeitung erteilt haben, können Sie diese Einwilligung jederzeit für die Zukunft widerrufen. Außerdem haben Sie das Recht, unter bestimmten Umständen die Einschränkung der Verarbeitung Ihrer personenbezogenen Daten zu verlangen. Des Weiteren steht Ihnen ein Beschwerderecht bei der zuständigen Aufsichtsbehörde zu.",
     
     hosting_title: "2. Hosting",
-    hosting_text: "Diese Website wird auf der base44-Plattform gehostet. Anbieter ist base44 Ltd. Beim Besuch dieser Website erfasst und speichert der Host automatisch verschiedene Informationen in sogenannten Server-Log-Dateien, die Ihr Browser automatisch übermittelt. Details zu den Datenschutzpraktiken des Hosts finden Sie unter:",
+    hosting_text: "Diese Website wird auf der base44-Plattform gehostet. Anbieter ist Base44, Inc. Beim Besuch dieser Website erfasst und speichert der Host automatisch verschiedene Informationen in sogenannten Server-Log-Dateien, die Ihr Browser automatisch übermittelt. Details zu den Datenschutzpraktiken des Hosts finden Sie unter:",
     
     controller_title: "3. Hinweis zur verantwortlichen Stelle",
     controller_text: "Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:",
@@ -124,7 +123,7 @@ const translations = {
     
     contact_rights: "Zur Ausübung Ihrer Rechte wenden Sie sich bitte an:",
     
-    last_updated: "Stand: Januar 2025"
+    last_updated: "Stand: Februar 2026"
   },
   it: {
     title: "Informativa sulla privacy",
@@ -148,7 +147,7 @@ const translations = {
     rights_answer: "Avete il diritto di ricevere gratuitamente informazioni sull'origine, il destinatario e lo scopo dei vostri dati personali memorizzati in qualsiasi momento. Avete anche il diritto di richiedere la correzione o la cancellazione di questi dati. Se avete dato il vostro consenso al trattamento dei dati, potete revocare questo consenso in qualsiasi momento per il futuro. Avete anche il diritto di richiedere la limitazione del trattamento dei vostri dati personali in determinate circostanze. Inoltre, avete il diritto di presentare un reclamo all'autorità di controllo competente.",
     
     hosting_title: "2. Hosting",
-    hosting_text: "Questo sito web è ospitato sulla piattaforma base44. Il fornitore è base44 Ltd. Quando visitate questo sito web, l'host raccoglie e memorizza automaticamente varie informazioni nei cosiddetti file di log del server che il vostro browser trasmette automaticamente. Per i dettagli sulle pratiche di protezione dei dati dell'host, consultare:",
+    hosting_text: "Questo sito web è ospitato sulla piattaforma base44. Il fornitore è Base44, Inc. Quando visitate questo sito web, l'host raccoglie e memorizza automaticamente varie informazioni nei cosiddetti file di log del server che il vostro browser trasmette automaticamente. Per i dettagli sulle pratiche di protezione dei dati dell'host, consultare:",
     
     controller_title: "3. Informazioni sul responsabile",
     controller_text: "Il responsabile del trattamento dei dati su questo sito web è:",
@@ -185,7 +184,7 @@ const translations = {
     
     contact_rights: "Per esercitare i vostri diritti, contattateci all'indirizzo:",
     
-    last_updated: "Ultimo aggiornamento: Gennaio 2025"
+    last_updated: "Ultimo aggiornamento: Febbraio 2026"
   },
   fr: {
     title: "Politique de confidentialité",
@@ -209,7 +208,7 @@ const translations = {
     rights_answer: "Vous avez le droit de recevoir gratuitement des informations sur l'origine, le destinataire et la finalité de vos données personnelles stockées à tout moment. Vous avez également le droit de demander la correction ou la suppression de ces données. Si vous avez donné votre consentement au traitement des données, vous pouvez révoquer ce consentement à tout moment pour l'avenir. Vous avez également le droit de demander la limitation du traitement de vos données personnelles dans certaines circonstances. En outre, vous avez le droit de déposer une plainte auprès de l'autorité de contrôle compétente.",
     
     hosting_title: "2. Hébergement",
-    hosting_text: "Ce site web est hébergé sur la plateforme base44. Le fournisseur est base44.com. Lorsque vous visitez ce site web, l'hébergeur collecte et stocke automatiquement diverses informations dans des fichiers journaux de serveur que votre navigateur transmet automatiquement. Pour plus de détails sur les pratiques de protection des données de l'hébergeur, veuillez consulter:",
+    hosting_text: "Ce site web est hébergé sur la plateforme base44. Le fournisseur est Base44, Inc. Lorsque vous visitez ce site web, l'hébergeur collecte et stocke automatiquement diverses informations dans des fichiers journaux de serveur que votre navigateur transmet automatiquement. Pour plus de détails sur les pratiques de protection des données de l'hébergeur, veuillez consulter:",
     
     controller_title: "3. Informations sur le responsable",
     controller_text: "Le responsable du traitement des données sur ce site web est:",
@@ -246,7 +245,7 @@ const translations = {
     
     contact_rights: "Pour exercer vos droits, veuillez nous contacter à:",
     
-    last_updated: "Dernière mise à jour: Janvier 2025"
+    last_updated: "Dernière mise à jour: Février 2026"
   }
 };
 
@@ -292,8 +291,8 @@ export default function Datenschutz() {
               <h2 className="text-2xl font-semibold mb-4">{t.hosting_title}</h2>
               <p className="mb-2">{t.hosting_text}</p>
               <p className="mb-2">
-                <a href="https://base44.com/data-privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
-                  https://base44.com/data-privacy
+                <a href="https://base44.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                  https://base44.com/privacy-policy
                 </a>
               </p>
             </section>

@@ -1,5 +1,3 @@
-
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -135,7 +133,7 @@ const LayoutContent = ({ children, currentPageName }) => {
             </div>
             
             <div>
-              <h3 className="font-semibold text-lg mb-3">Links</h3>
+              <h3 className="font-semibold text-lg mb-3">{t('quick_links')}</h3>
               <div className="flex flex-col gap-2">
                 <Link 
                   to={createPageUrl("Products")}
@@ -159,19 +157,19 @@ const LayoutContent = ({ children, currentPageName }) => {
             </div>
             
             <div>
-              <h3 className="font-semibold text-lg mb-3">Legal</h3>
+              <h3 className="font-semibold text-lg mb-3">{t('legal')}</h3>
               <div className="flex flex-col gap-2">
                 <Link 
                   to={createPageUrl("Impressum")}
                   className="text-sm text-gray-600 hover:text-blue-600"
                 >
-                  Impressum
+                  {t('imprint_title')}
                 </Link>
                 <Link 
                   to={createPageUrl("Datenschutz")}
                   className="text-sm text-gray-600 hover:text-blue-600"
                 >
-                  Datenschutz
+                  {t('privacy_title')}
                 </Link>
               </div>
             </div>
@@ -204,4 +202,3 @@ export default function Layout({ children, currentPageName }) {
     </TranslationProvider>
   );
 }
-

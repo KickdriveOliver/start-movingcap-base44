@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Check, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "@/components/useTranslations";
 import { createPageUrl } from "@/utils";
+import { products } from "@/components/data/products";
 
 export default function Products() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const { t, currentLang } = useTranslations(); // Destructure currentLang
+  const { t, currentLang } = useTranslations();
   const datasheetUrl = currentLang === 'de'
     ? "https://movingcap.de/MovingCap-AnwenderDoku/#1-datenblatter_pdf"
     : "https://movingcap.de/MovingCap-AnwenderDoku/#1-datenblatter_pdf";
@@ -29,21 +27,7 @@ export default function Products() {
     return byLang || product?.datasheet_url || datasheetUrl;
   };
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const productList = await base44.entities.Product.list();
-        setProducts(productList);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchProducts();
-  }, []);
 
   const filteredProducts = products.filter(product => 
     (product.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -138,13 +122,8 @@ export default function Products() {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin h-8 w-8 border-4 border-blue-600 rounded-full border-t-transparent"></div>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 gap-8">
-          {filteredProducts.map((product, index) => (
+      <div className="grid md:grid-cols-2 gap-8">
+        {filteredProducts.map((product, index) => (
             <motion.div
               key={product.id}
               custom={index}
@@ -184,24 +163,17 @@ export default function Products() {
                   )}
                 </CardContent>
                 <CardFooter>
-                  {hasDatasheet(product) ? (
-                    <Button className="w-full" asChild>
-                      <a href={getDatasheetUrl(product)} target="_blank" rel="noopener noreferrer">
-                        {t('learn_more')}
-                        <ArrowRight className="ml-2 w-4 h-4" />
-                      </a>
-                    </Button>
-                  ) : (
-                    <div className="w-full py-2 px-4 bg-gray-100 text-gray-500 rounded-md text-center font-medium">
-                      {t('coming_soon')}
-                    </div>
-                  )}
+                  <Button className="w-full" asChild>
+                    <Link to={createPageUrl(`ProductDetail?series=${product.series}`)}>
+                      {t('learn_more')}
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
+                  </Button>
                 </CardFooter>
               </Card>
             </motion.div>
-          ))}
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 }

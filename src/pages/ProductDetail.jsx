@@ -1,23 +1,28 @@
-
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-// Remove invalid entity import and use base44 SDK instead
-// import { Product } from "@/api/entities";
-import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, ChevronLeft, Check, Info, Settings, LucideFileText } from "lucide-react";
+import { Download, ChevronLeft, Check, Info, Settings, FileText } from "lucide-react";
 import { useTranslations } from "@/components/useTranslations";
 import { createPageUrl } from "@/utils";
+import { products } from "@/components/data/products";
 
 export default function ProductDetail() {
-  const { series } = useParams();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
   const { t, currentLang } = useTranslations();
   const navigate = useNavigate();
+  
+  // Get series from URL query params
+  const urlParams = new URLSearchParams(window.location.search);
+  const seriesParam = urlParams.get('series');
+  
+  // Get product from static data (case-insensitive lookup)
+  const staticProduct = useMemo(() => {
+    if (!seriesParam) return null;
+    return products.find(p => p.series.toLowerCase() === seriesParam.toLowerCase());
+  }, [seriesParam]);
+  const [displayImage, setDisplayImage] = useState(staticProduct?.image_url);
 
   // NEW: per-series fallback feature keys (same as Products page)
   const fallbackFeatureKeysBySeries = {
@@ -53,48 +58,15 @@ export default function ProductDetail() {
     return list.slice(0, 3);
   };
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      setLoading(true);
-      try {
-        // Use base44 SDK to fetch by series
-        const products = await base44.entities.Product.filter({ series: series });
-        if (products && products.length > 0) {
-          setProduct(products[0]);
-        } else {
-          // Product not found, redirect to Products page
-          navigate(createPageUrl("Products"));
-        }
-      } catch (error) {
-        console.error("Error fetching product:", error);
-        // On error, redirect to Products page
-        navigate(createPageUrl("Products"));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (series) {
-      fetchProduct();
-    }
-  }, [series, navigate]);
-
-  if (loading) {
-    return (
-      <div className="container mx-auto py-16 flex justify-center items-center">
-        <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div>
-      </div>
-    );
-  }
-
-  if (!product) {
-    // This case should ideally not be reached if the redirects in useEffect work correctly
+  if (!staticProduct) {
     return (
       <div className="container mx-auto py-16">
         <h1 className="text-2xl font-bold text-center">{t('product_not_found') || "Product not found"}</h1>
       </div>
     );
   }
+  
+  const product = staticProduct;
 
   // Helper to check if product has datasheet available
   const hasDatasheet = !!(product?.datasheet_url || product?.datasheet_url_de || product?.datasheet_url_en || product?.datasheet_url_it);
@@ -127,7 +99,7 @@ export default function ProductDetail() {
             <div className="bg-white rounded-xl shadow-md overflow-hidden">
               <div className="bg-gray-50 p-6 flex justify-center">
                 <img
-                  src={product.image_url}
+                  src={displayImage || product.image_url}
                   alt={product.name}
                   className="max-h-72 object-contain"
                 />
@@ -140,7 +112,7 @@ export default function ProductDetail() {
                       key={idx} 
                       className="bg-gray-50 rounded p-2 cursor-pointer hover:bg-blue-50 transition-colors"
                       // Use state setter to trigger re-render instead of mutating object
-                      onClick={() => setProduct(prev => ({ ...prev, image_url: url }))}
+                      onClick={() => setDisplayImage(url)}
                     >
                       <img
                         src={url}
@@ -192,7 +164,7 @@ export default function ProductDetail() {
                   <span className="hidden sm:inline">{t('specifications') || "Specifications"}</span>
                 </TabsTrigger>
                 <TabsTrigger value="applications" className="flex items-center gap-1">
-                  <LucideFileText className="w-4 h-4" />
+                  <FileText className="w-4 h-4" />
                   <span className="hidden sm:inline">{t('applications') || "Applications"}</span>
                 </TabsTrigger>
               </TabsList>
@@ -212,21 +184,35 @@ export default function ProductDetail() {
               <TabsContent value="specs" className="p-6">
                 <h3 className="text-xl font-bold mb-4">{t('technical_specifications') || "Technical Specifications"}</h3>
                 
-                {product.specifications && Object.entries(product.specifications).length > 0 ? (
-                  <div className="divide-y">
-                    {Object.entries(product.specifications).map(([key, value]) => (
-                      value && (
-                        <div key={key} className="py-2 grid grid-cols-2">
-                          <div className="font-medium text-gray-600">
-                            {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                          </div>
-                          <div>{value}</div>
-                        </div>
-                      )
-                    ))}
+                {product.technical_specs ? (
+                  <div className="space-y-3">
+                    {product.technical_specs.max_stroke_mm && (
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">{t('calculator_max_stroke') || "Max Stroke"}</span>
+                        <span className="font-medium">{product.technical_specs.max_stroke_mm} mm</span>
+                      </div>
+                    )}
+                    {product.technical_specs.max_force_n && (
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">{t('calculator_peak_force') || "Peak Force"}</span>
+                        <span className="font-medium">{product.technical_specs.max_force_n} N</span>
+                      </div>
+                    )}
+                    {product.technical_specs.max_speed_mm_s && (
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">{t('calculator_max_speed') || "Max Speed"}</span>
+                        <span className="font-medium">{product.technical_specs.max_speed_mm_s} mm/s</span>
+                      </div>
+                    )}
+                    {product.technical_specs.moving_mass_g && (
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">{t('calculator_motor_mass') || "Moving Mass"}</span>
+                        <span className="font-medium">{product.technical_specs.moving_mass_g} g</span>
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <p className="text-gray-500">{t('no_specifications') || "No specifications available."}</p>
+                  <p className="text-gray-500">{t('see_datasheet_for_specs') || "See datasheet for detailed specifications."}</p>
                 )}
               </TabsContent>
 
@@ -246,7 +232,7 @@ export default function ProductDetail() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">{t('no_applications') || "No application data available."}</p>
+                  <p className="text-gray-500">{t('see_datasheet_for_applications') || "See datasheet for typical applications."}</p>
                 )}
               </TabsContent>
             </Tabs>

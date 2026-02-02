@@ -5,46 +5,37 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useTranslations } from "@/components/useTranslations";
-import { base44 } from "@/api/base44Client";
+import { products } from "@/components/data/products";
 
 export default function Landing() {
   const { t, currentLang } = useTranslations();
 
   // Define default/fallback datasheet URLs
   const datasheetUrlDE = "https://movingcap.de/MovingCap-AnwenderDoku/#1-datenblatter_pdf";
-  const datasheetUrlEN = "https://movingcap.de/MovingCap-AnwenderDoku/#1-datenblatter_pdf"; // Assuming a generic English doc for now, can be updated if specific one exists
+  const datasheetUrlEN = "https://movingcap.de/MovingCap-AnwenderDoku/#1-datenblatter_pdf";
 
-  // State to store product datasheet links
-  const [dsLinks, setDsLinks] = React.useState({});
-  const [productsBySeries, setProductsBySeries] = React.useState({});
+  // Build datasheet links and products by series from static data
+  const dsLinks = React.useMemo(() => {
+    const map = {};
+    products.forEach(p => {
+      map[p.series] = {
+        de: p.datasheet_url_de || p.datasheet_url || datasheetUrlDE,
+        en: p.datasheet_url_en || p.datasheet_url || datasheetUrlEN,
+        it: p.datasheet_url_it || p.datasheet_url_en || p.datasheet_url || datasheetUrlEN
+      };
+    });
+    return map;
+  }, []);
 
-  // Effect to load product datasheet links from the API
-  React.useEffect(() => {
-    const load = async () => {
-      try {
-        const list = await base44.entities.Product.list();
-        const map = {};
-        const bySeries = {};
-        list.forEach(p => {
-          // Fallback logic: specific language URL -> generic datasheet_url -> hardcoded default
-          map[p.series] = {
-            de: p.datasheet_url_de || p.datasheet_url || datasheetUrlDE,
-            en: p.datasheet_url_en || p.datasheet_url || datasheetUrlEN,
-            it: p.datasheet_url_it || p.datasheet_url_en || p.datasheet_url || datasheetUrlEN // Fallback to EN if IT not available
-          };
-          if (p.series) {
-            bySeries[p.series] = p;
-          }
-        });
-        setDsLinks(map);
-        setProductsBySeries(bySeries);
-      } catch (e) {
-        console.error("Failed to load product datasheet links:", e); // Log error but allow fallbacks
-        // ignore, fallbacks will be used
+  const productsBySeries = React.useMemo(() => {
+    const bySeries = {};
+    products.forEach(p => {
+      if (p.series) {
+        bySeries[p.series] = p;
       }
-    };
-    load();
-  }, []); // Run once on mount
+    });
+    return bySeries;
+  }, []);
 
   // Helper to pick localized description per series
   const getSeriesDescription = (series) => {
@@ -258,18 +249,12 @@ export default function Landing() {
                       </li>
                     ))}
                   </ul>
-                  {hasDatasheet(item.series) ? (
-                    <Button className="w-full mt-auto" asChild>
-                      <a href={getDatasheetUrlForSeries(item.series)} target="_blank" rel="noopener noreferrer">
-                        {t('learn_more')}
-                        <ArrowRight className="ml-2 w-4 h-4" />
-                      </a>
-                    </Button>
-                  ) : (
-                    <div className="w-full mt-auto py-2 px-4 bg-gray-100 text-gray-500 rounded-md text-center font-medium">
-                      {t('coming_soon')}
-                    </div>
-                  )}
+                  <Button className="w-full mt-auto" asChild>
+                    <Link to={createPageUrl(`ProductDetail?series=${item.series}`)}>
+                      {t('learn_more')}
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
+                  </Button>
                 </div>
               </motion.div>
             ))}

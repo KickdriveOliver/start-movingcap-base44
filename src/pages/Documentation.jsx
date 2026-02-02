@@ -4,30 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Shield, Globe, Code, Network, Download, ClipboardList } from "lucide-react";
 import { useTranslations } from "@/components/useTranslations";
-import { base44 } from "@/api/base44Client";
+import { products } from "@/components/data/products";
 
 export default function Documentation() {
   const { t, currentLang } = useTranslations();
 
-  // Load all products to expose datasheet links by language
-  const [products, setProducts] = React.useState([]);
-  const [dsLoading, setDsLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const load = async () => {
-      setDsLoading(true);
-      try {
-        const list = await base44.entities.Product.list();
-        setProducts(list || []);
-      } catch (error) {
-        console.error("Failed to load products:", error);
-        setProducts([]); // Ensure products is an array even on error
-      } finally {
-        setDsLoading(false);
-      }
-    };
-    load();
-  }, []);
+  // Products loaded from static data - no loading state needed
+  const dsLoading = false;
 
   const getDatasheetUrl = (p) => {
     const fallback = "https://movingcap.de/MovingCap-AnwenderDoku/#1-datenblatter_pdf";
@@ -45,7 +28,7 @@ export default function Documentation() {
           transition={{ duration: 0.5 }}
         >
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-4">MovingCap Documentation</h1>
+            <h1 className="text-3xl font-bold mb-4">{t('documentation')}</h1>
             <p className="text-lg text-gray-600">
               {t('docs_intro_prefix') || "Complete technical documentation is available at"}{" "}
               <a 
@@ -190,7 +173,7 @@ export default function Documentation() {
                 </p>
                 <Button asChild>
                   <a 
-                    href="https://movingcap.de/MovingCap-AnwenderDoku/#movingcap-io" 
+                    href="https://movingcap.com/MovingCap-AnwenderDoku/#movingcap-io" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center gap-2"

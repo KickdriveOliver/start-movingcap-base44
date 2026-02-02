@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { base44 } from "@/api/base44Client";
+import { getCalculatorProducts } from "@/components/data/products";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,13 +13,15 @@ import {
   PackagePlus,
   CheckCircle2,
   XCircle,
+  AlertTriangle,
   Cpu,
   RotateCcw,
   Unlock,
   Lock,
   Minus,
-  Plus
-  } from "lucide-react";
+  Plus,
+  Info
+} from "lucide-react";
 import { useTranslations } from "@/components/useTranslations";
 import {
   LineChart,
@@ -36,120 +38,139 @@ import {
 // Copyright 2025 Kickdrive Software Solutions / Fullmo Drives GmbH
 const calculateTrajectoryParameters = ({ distance, maxVelocity, maxAcceleration, maxJerk }) => {
   if (distance <= 0 || maxVelocity <= 0 || maxAcceleration <= 0) {
-   return null;
+    let finalParams = {
+    success: false
+    };
+    return finalParams;
   }
-  if (maxJerk <= 0) maxJerk = 2100000000;
+  const jerkTrapezoidal = 2100000000 * 1000.0;
+  if (maxJerk <= 0) maxJerk = jerkTrapezoidal;
+  
+  const cMaxAcceleration = maxAcceleration;
+  
+  let finalMaxVelocity = maxVelocity;
+  // --- Case 1: jerk-limited only (never reaches max acceleration) ---
+  const dThreshold = (2 * Math.pow(maxAcceleration, 3)) / Math.pow(maxJerk, 2);
+  if (distance <= dThreshold) {
+    // v_max = (j * d^2 / 4)^(1/3)
+    finalMaxVelocity = Math.pow((maxJerk * Math.pow(distance, 2)) / 4.0, 1.0 / 3.0);
+  } else {
+    // --- Case 2: reaches max acceleration, no cruise ---
+    // Solve quadratic for plateau time t_a
+    const A = maxAcceleration;
+    const B = (maxAcceleration * maxAcceleration) / maxJerk;
+    const C = (2 * Math.pow(maxAcceleration, 3)) / Math.pow(maxJerk, 2) - distance;
 
-  let cMaxVelocity = maxVelocity;
-  let cMaxAcceleration = maxAcceleration;
-  let cMaxJerk = maxJerk;
-  let recalculate = false;
-  let success = false;
-  let finalParams = {};
-  do {
-    if ((cMaxVelocity * cMaxVelocity / cMaxAcceleration) > distance) {
-      cMaxVelocity = Math.sqrt(distance * cMaxAcceleration);
-      if (cMaxVelocity < 1) cMaxVelocity = 1;
+    const discriminant = Math.pow(B, 2) - 4 * A * C;
+    let t_a = 0;
+    if (discriminant >= 0) {
+      t_a = (-B + Math.sqrt(discriminant)) / (2 * A);
+      finalMaxVelocity = maxAcceleration * t_a + (maxAcceleration * maxAcceleration) / maxJerk;
     }
+  }
 
-    let tJer = cMaxAcceleration / cMaxJerk;
-    let tAcc = (cMaxVelocity / cMaxAcceleration) - tJer;
-    if (tAcc <= 0) {
-      tAcc = 0;
-      cMaxJerk = (cMaxAcceleration * cMaxAcceleration) / cMaxVelocity;
-      tJer = cMaxAcceleration / cMaxJerk;
-    }
+  // Clamp by external velocity limit if provided
+  const isVelocityLimited = finalMaxVelocity < maxVelocity;
+  if (!isVelocityLimited) {
+    finalMaxVelocity = maxVelocity;
+  }
 
-    const pJerU = (cMaxAcceleration * cMaxAcceleration * cMaxAcceleration) / (6.0 * cMaxJerk * cMaxJerk); 
-    const vJerU = (cMaxAcceleration * cMaxAcceleration) / (2.0 * cMaxJerk); 
+  
+  let finalJerkValue = (maxAcceleration * maxAcceleration) / finalMaxVelocity;
+  const isJerkMinLimited = (maxJerk < finalJerkValue);
+  if (!isJerkMinLimited) finalJerkValue = maxJerk;
+  const isTrapezoidal = (finalJerkValue >= jerkTrapezoidal);
+  const tJer = (isTrapezoidal ? 0: cMaxAcceleration / finalJerkValue);
 
-    const pAccC = pJerU + vJerU * tAcc + cMaxAcceleration * tAcc * tAcc / 2.0;
-    let vAccC = cMaxVelocity - (cMaxAcceleration * cMaxAcceleration) / (2.0 * cMaxJerk);
+  // duration of constant acceleration while jerk=0 (acceleration = cMaxAcceleration)
+  let vDiffC = finalMaxVelocity;
+  if (!isTrapezoidal) {
+    vDiffC -= (maxAcceleration * maxAcceleration) / finalJerkValue;
+    vDiffC = Math.min(0, vDiffC);
+  }
+  let tAccC = vDiffC / cMaxAcceleration;
 
-    const pHelp = pAccC + cMaxAcceleration * tJer * tJer / 2.0 - cMaxJerk * tJer * tJer * tJer / 6;
-    const pJerD = vAccC * tJer + pHelp;
-    const tVel = (distance - 2 * pJerD) / cMaxVelocity;
-    const tTrajectory = 4 * tJer + 2 * tAcc + tVel;
 
-    if (pJerD > distance / 2.0) {
-      if (recalculate) {
-        recalculate = false;
-      } else {
-        vAccC = (distance / 2.0 - pHelp) / tJer;
-        if (vAccC < 0) {vAccC = 0; }
-        cMaxVelocity = vAccC + (cMaxAcceleration * cMaxAcceleration) / (2.0 * cMaxJerk);
-        if (tAcc <= 0) {
-           cMaxJerk = (cMaxAcceleration * cMaxAcceleration) / cMaxVelocity;
-        }
-        recalculate = true;
-      }
-    } else {
-      recalculate = false;
-      success = true;
-      finalParams = {
-        tJer: tJer,
-        tAcc: tAcc,
-        tVel: tVel, 
-        tTrajectory: tTrajectory,
-        finalMaxVelocity: cMaxVelocity,
-        finalMaxAcceleration: cMaxAcceleration,
-        finalMaxJerk: cMaxJerk,
-        pJerD: pJerD,
-        distance: distance,
-        success: true,
-      };
-    }
-  } while (recalculate);
+  // put the whole acceleration together
+  const tVmaxReached = tAccC + 2 * tJer; 
+  // same-time trapezoidal equivalent with constant acceleration <= cMaxAcceleration
+  const cAverageAcceleration = finalMaxVelocity / tVmaxReached;
+  const pVmaxReached = 0.5 * (finalMaxVelocity * finalMaxVelocity) / cAverageAcceleration;
 
-  return success? finalParams : null;
+  // duration of the constant velocity part 
+  const tVelConstant = (distance - 2 * pVmaxReached) / finalMaxVelocity;
+
+  // total run 
+  const tTrajectory = 2 * tVmaxReached + tVelConstant;
+
+  let finalParams = {
+    tJer: tJer,
+    tAccC: tAccC,
+    tVmaxReached: tVmaxReached,
+    tVelConstant: tVelConstant, 
+    tTrajectory: tTrajectory,
+    finalMaxVelocity: finalMaxVelocity,
+    finalMaxAcceleration: cMaxAcceleration,
+    finalJerkValue: finalJerkValue,
+    averageAcceleration: cAverageAcceleration,
+    distance: distance,
+    success: true,
+    isVelocityLimited: isVelocityLimited,
+    isJerkMinLimited: isJerkMinLimited,
+    isTrapezoidal: isTrapezoidal
+  };
+
+  return finalParams;
 };
 
+
 const getPointInTrajectory = (t, params) => {
-  const { tJer, tAcc, tVel, finalMaxVelocity, finalMaxAcceleration, finalMaxJerk } = params;
+  const { tJer, tAccC, tVmaxReached, tVelConstant, tTrajectory, finalMaxVelocity, finalMaxAcceleration, finalJerkValue, averageAcceleration, distance, 
+      success, isVelocityLimited, isJerkMinLimited, isTrapezoidal} = params;
 
   // Define phase transition times
   const t1 = tJer;
-  const t2 = tJer + tAcc;
-  const t3 = tJer + tAcc + tJer;
-  const t4 = tJer + tAcc + tJer + tVel;
-  const t5 = tJer + tAcc + tJer + tVel + tJer;
-  const t6 = tJer + tAcc + tJer + tVel + tJer + tAcc;
-  const t7 = tJer + tAcc + tJer + tVel + tJer + tAcc + tJer;
+  const t2 = tJer + tAccC;
+  const t3 = tVmaxReached;
+  const t4 = tVmaxReached + tVelConstant;
+  const t5 = tTrajectory - tJer - tAccC;
+  const t6 = tTrajectory - tJer;
+  const t7 = tTrajectory;
 
   let position = 0, velocity = 0, acceleration = 0, jerk = 0, phase = '';
 
-  // Pre-calculate end-of-phase values
+  // Pre-calculate end-of-phase values for easier calculation
   let a1 = finalMaxAcceleration;
   let v1 = 0; 
   let p1 = 0;
   if (t1 > 0) {
-    a1 = finalMaxJerk * t1;
-    v1 = 0.5 * finalMaxJerk * t1 * t1;
-    p1 = (1/6) * finalMaxJerk * t1 * t1 * t1;
+    v1 = 0.5 * finalJerkValue * t1 * t1;
+    p1 = (1/6) * finalJerkValue * t1 * t1 * t1;
   }
 
-  const v2 = v1 + a1 * tAcc;
-  const p2 = p1 + v1 * tAcc + 0.5 * a1 * tAcc * tAcc;
+  const v2 = v1 + a1 * tAccC;
+  const p2 = p1 + v1 * tAccC + 0.5 * a1 * tAccC * tAccC;
 
   const v3 = finalMaxVelocity;
-  const p3 = params.pJerD;
+  const p3 = 0.5 * (finalMaxVelocity * finalMaxVelocity) / averageAcceleration;
 
-  const p4 = p3 + v3 * tVel;
+  const p4 = p3 + v3 * tVelConstant;
 
   const a5 = -finalMaxAcceleration;
   let v5 = v3;
   let p5 = p4; 
   if (tJer > 0) {
-    v5 = v3 - 0.5 * finalMaxJerk * tJer * tJer;
-    p5 = p4 + v3 * tJer - (1/6) * finalMaxJerk * tJer * tJer * tJer;
+    v5 = v3 - 0.5 * finalJerkValue * tJer * tJer;
+    p5 = p4 + v3 * tJer - (1/6) * finalJerkValue * tJer * tJer * tJer;
   }
-  const v6 = v5 + a5 * tAcc;
-  const p6 = p5 + v5 * tAcc + 0.5 * a5 * tAcc * tAcc;
+  const v6 = v5 + a5 * tAccC;
+  const p6 = p5 + v5 * tAccC + 0.5 * a5 * tAccC * tAccC;
 
   if (t >= 0 && t < t1) { // Phase 1: Accel Jerk Up
     phase = 'Accel Jerk Up';
-    jerk = finalMaxJerk;
+    jerk = finalJerkValue;
     acceleration = jerk * t;
+    if (acceleration > finalMaxAcceleration) acceleration = finalMaxAcceleration;
     velocity = 0.5 * jerk * t * t;
     position = (1/6) * jerk * t * t * t;
   } else if (t >= t1 && t < t2) { // Phase 2: Constant Accel
@@ -161,9 +182,10 @@ const getPointInTrajectory = (t, params) => {
     position = p1 + v1 * dt + 0.5 * acceleration * dt * dt;
   } else if (t >= t2 && t < t3) { // Phase 3: Accel Jerk Down
     phase = 'Accel Jerk Down';
-    jerk = -finalMaxJerk;
+    jerk = -finalJerkValue;
     const dt = t - t2;
     acceleration = finalMaxAcceleration + jerk * dt;
+    if (acceleration < 0) acceleration = 0;
     velocity = v2 + finalMaxAcceleration * dt + 0.5 * jerk * dt * dt;
     position = p2 + v2 * dt + 0.5 * finalMaxAcceleration * dt * dt + (1/6) * jerk * dt * dt * dt;
   } else if (t >= t3 && t < t4) { // Phase 4: Constant Velocity
@@ -175,9 +197,10 @@ const getPointInTrajectory = (t, params) => {
     position = p3 + velocity * dt;
   } else if (t >= t4 && t < t5) { // Phase 5: Decel Jerk Up
     phase = 'Decel Jerk Up';
-    jerk = -finalMaxJerk;
+    jerk = -finalJerkValue;
     const dt = t - t4;
     acceleration = jerk * dt;
+    if (acceleration < -finalMaxAcceleration) acceleration = -finalMaxAcceleration;
     velocity = v3 + 0.5 * jerk * dt * dt;
     position = p4 + v3 * dt + (1/6) * jerk * dt * dt * dt;
   } else if (t >= t5 && t < t6) { // Phase 6: Constant Decel
@@ -189,18 +212,22 @@ const getPointInTrajectory = (t, params) => {
     position = p5 + v5 * dt + 0.5 * acceleration * dt * dt;
   } else if (t >= t6 && t <= t7) { // Phase 7: Decel Jerk Down
     phase = 'Decel Jerk Down';
-    jerk = finalMaxJerk;
+    jerk = finalJerkValue;
     const dt = t - t6;
     acceleration = -finalMaxAcceleration + jerk * dt;
+    if (acceleration > 0) acceleration = 0;
     velocity = v6 - finalMaxAcceleration * dt + 0.5 * jerk * dt * dt;
     position = p6 + v6 * dt - 0.5 * finalMaxAcceleration * dt * dt + (1/6) * jerk * dt * dt * dt;
+    if (position > distance) position = distance;
   } else if (t > t7) { // End of trajectory
     phase = 'Arrived';
     jerk = 0;
     acceleration = 0;
     velocity = 0;
-    position = params.distance;
+    position = distance;
   }
+
+  if (velocity < 0) velocity = 0;
 
   return { position, velocity, acceleration, jerk, phase };
 };
@@ -233,23 +260,10 @@ export default function Calculator() {
 
   // --- Effects ---
 
-  // 1. Fetch Products
+  // 1. Load Products from static data
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const products = await base44.entities.Product.list();
-        // Filter for linear drives that have technical specs suitable for calculator
-        // Specifically looking for flatTRACK, FATtrack, shortTRACK as requested
-        const validSeries = ['flatTRACK', 'FATtrack', 'shortTRACK'];
-        const filtered = products.filter(p => 
-          validSeries.includes(p.series) && p.technical_specs
-        );
-        setAvailableProducts(filtered);
-      } catch (error) {
-        console.error("Failed to load products for calculator", error);
-      }
-    };
-    fetchProducts();
+    const filtered = getCalculatorProducts();
+    setAvailableProducts(filtered);
   }, []);
 
   // 2. Apply Product Specs when selected
@@ -289,32 +303,32 @@ export default function Calculator() {
   }, [selectedProduct]);
 
   // 3. Calculate Max Possible Acceleration (Physics)
-      useEffect(() => {
-        const maxForce = parseFloat(physicsParams.maxForce) || 0;
-        const motorMass = parseFloat(physicsParams.motorMass) || 0;
-        const payloadMass = parseFloat(physicsParams.payloadMass) || 0;
-        const totalMassKg = (motorMass + payloadMass) / 1000;
+  useEffect(() => {
+    const maxForce = parseFloat(physicsParams.maxForce) || 0;
+    const motorMass = parseFloat(physicsParams.motorMass) || 0;
+    const payloadMass = parseFloat(physicsParams.payloadMass) || 0;
+    const totalMassKg = (motorMass + payloadMass) / 1000;
 
-        if (totalMassKg <= 0 || maxForce <= 0) {
-          setCalculatedAccel({ maxAccelMicrometers: Infinity, maxAccelMeters: Infinity });
-          return;
-        }
+    if (totalMassKg <= 0 || maxForce <= 0) {
+      setCalculatedAccel({ maxAccelMicrometers: Infinity, maxAccelMeters: Infinity });
+      return;
+    }
 
-        const maxAcceleration = maxForce / totalMassKg;
-        const maxAccelMicrometers = maxAcceleration * 1000000;
+    const maxAcceleration = maxForce / totalMassKg;
+    const maxAccelMicrometers = maxAcceleration * 1000000;
 
-        setCalculatedAccel({
-          maxAccelMicrometers,
-          maxAccelMeters: maxAcceleration
-        });
-      }, [physicsParams]);
+    setCalculatedAccel({
+      maxAccelMicrometers,
+      maxAccelMeters: maxAcceleration
+    });
+  }, [physicsParams]);
 
   // 4. Auto-update Accel/Jerk if "Apply to profile" is checked
   useEffect(() => {
     if (useCalculatedAccel && calculatedAccel && isFinite(calculatedAccel.maxAccelMeters)) {
       const roundedAccelMS2 = Math.round(calculatedAccel.maxAccelMeters * 10) / 10;
       
-      // Jerk = 100x Acceleration (in m/s²)
+      // Jerk = 100x Acceleration (in m/s³)
       const suggestedJerk = roundedAccelMS2 * 100;
       const roundedJerkMS3 = Math.round(suggestedJerk * 10) / 10; 
       
@@ -328,10 +342,10 @@ export default function Calculator() {
 
   // 5. Calculate Trajectory
   const internalParams = useMemo(() => ({
-    distance: params.distanceMm * 1000, // mm -> µm
-    maxSpeed: params.maxSpeedMmS * 1000, // mm/s -> µm/s
-    maxAccel: params.maxAccelMS2 * 1000000, // m/s² -> µm/s²
-    maxJerk: params.maxJerkMS3 * 1000000, // m/s³ -> µm/s³
+    distance: params.distanceMm * 1000,
+    maxSpeed: params.maxSpeedMmS * 1000, 
+    maxAccel: params.maxAccelMS2 * 1000000, 
+    maxJerk: params.maxJerkMS3 * 1000000, 
   }), [params]);
 
   useEffect(() => {
@@ -377,7 +391,16 @@ export default function Calculator() {
         totalTime: totalTime.toFixed(3),
         maxVelocityReached: Math.max(...data.map(d => d.velocity)),
         maxAccelReached: Math.max(...data.map(d => Math.abs(d.acceleration))),
-        finalPosition: finalPoint.position
+        finalPosition: finalPoint.position,
+        // Trajectory adjustment flags
+        isVelocityLimited: traj.isVelocityLimited,
+        isJerkMinLimited: traj.isJerkMinLimited,
+        isTrapezoidal: traj.isTrapezoidal,
+        // Actual values used
+        actualVelocity: traj.finalMaxVelocity / 1000, // convert to mm/s
+        actualJerk: traj.finalJerkValue / 1000000, // convert to m/s³
+        requestedVelocity: params.maxSpeedMmS,
+        requestedJerk: params.maxJerkMS3
       });
     } else {
       setResults(null);
@@ -438,6 +461,9 @@ export default function Calculator() {
   }, [selectedProduct, params, physicsParams]);
 
   const hasErrors = validations.some(v => v.type === 'error');
+
+  // Check if trajectory was adjusted
+  const hasTrajectoryAdjustments = results && (results.isVelocityLimited || results.isJerkMinLimited || results.isTrapezoidal);
 
   // Handle input blur on Enter/Done key press for mobile keyboards
   const handleInputBlur = (e) => {
@@ -870,10 +896,10 @@ export default function Calculator() {
             
             {/* Verification Status - Compact inline */}
             {selectedProduct && (
-               <div className={`px-3 py-2 rounded-lg border flex items-center gap-3 flex-wrap ${hasErrors ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
-                  {hasErrors ? <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />}
-                  <span className={`text-sm font-medium ${hasErrors ? 'text-red-800' : 'text-green-800'}`}>
-                     {hasErrors ? t('calculator_config_exceeds') : t('calculator_config_valid')}
+               <div className={`px-3 py-2 rounded-lg border flex items-center gap-3 flex-wrap ${hasErrors ? 'bg-red-50 border-red-200' : hasTrajectoryAdjustments ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
+                  {hasErrors ? <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" /> : hasTrajectoryAdjustments ? <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />}
+                  <span className={`text-sm font-medium ${hasErrors ? 'text-red-800' : hasTrajectoryAdjustments ? 'text-amber-800' : 'text-green-800'}`}>
+                     {hasErrors ? t('calculator_config_exceeds') : hasTrajectoryAdjustments ? t('calculator_config_adjusted') : t('calculator_config_valid')}
                   </span>
                   <div className="flex items-center gap-3 text-xs ml-auto">
                      {validations.map((v, idx) => (
@@ -885,21 +911,85 @@ export default function Calculator() {
                   </div>
                </div>
             )}
+            
+            {/* Trajectory Adjustment Feedback */}
+            {hasTrajectoryAdjustments && (
+               <div className="px-3 py-2 rounded-lg border bg-amber-50 border-amber-200">
+                  <div className="flex items-start gap-2 mb-2">
+                     <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                     <div>
+                        <span className="text-sm font-medium text-amber-800">{t('calculator_adjusted_params')}</span>
+                        <p className="text-xs text-amber-700 mt-0.5">
+                           {results.isVelocityLimited && t('calculator_velocity_limited_desc')}
+                           {results.isJerkMinLimited && !results.isVelocityLimited && t('calculator_jerk_increased_desc')}
+                           {results.isTrapezoidal && !results.isVelocityLimited && !results.isJerkMinLimited && t('calculator_trapezoidal_desc')}
+                        </p>
+                     </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                     {results.isVelocityLimited && (
+                        <div className="bg-white/60 rounded px-2 py-1.5 border border-amber-100">
+                           <div className="text-amber-600 font-medium flex items-center gap-1">
+                              <Info className="w-3 h-3" />
+                              {t('calculator_velocity_limited')}
+                           </div>
+                           <div className="mt-1 space-y-0.5">
+                              <div className="flex justify-between">
+                                 <span className="text-gray-500">{t('calculator_requested')}:</span>
+                                 <span className="text-gray-700 line-through">{results.requestedVelocity} mm/s</span>
+                              </div>
+                              <div className="flex justify-between">
+                                 <span className="text-gray-500">{t('calculator_actual')}:</span>
+                                 <span className="text-amber-700 font-medium">{results.actualVelocity.toFixed(0)} mm/s</span>
+                              </div>
+                           </div>
+                        </div>
+                     )}
+                     {results.isJerkMinLimited && (
+                        <div className="bg-white/60 rounded px-2 py-1.5 border border-amber-100">
+                           <div className="text-amber-600 font-medium flex items-center gap-1">
+                              <Info className="w-3 h-3" />
+                              {t('calculator_jerk_increased')}
+                           </div>
+                           <div className="mt-1 space-y-0.5">
+                              <div className="flex justify-between">
+                                 <span className="text-gray-500">{t('calculator_requested')}:</span>
+                                 <span className="text-gray-700 line-through">{results.requestedJerk} m/s³</span>
+                              </div>
+                              <div className="flex justify-between">
+                                 <span className="text-gray-500">{t('calculator_actual')}:</span>
+                                 <span className="text-amber-700 font-medium">{results.actualJerk.toFixed(1)} m/s³</span>
+                              </div>
+                           </div>
+                        </div>
+                     )}
+                     {results.isTrapezoidal && (
+                        <div className="bg-white/60 rounded px-2 py-1.5 border border-amber-100">
+                           <div className="text-amber-600 font-medium flex items-center gap-1">
+                              <Info className="w-3 h-3" />
+                              {t('calculator_trapezoidal_profile')}
+                           </div>
+                           <p className="mt-1 text-gray-600">{t('calculator_trapezoidal_desc')}</p>
+                        </div>
+                     )}
+                  </div>
+               </div>
+            )}
 
             {/* Main Results Chart */}
             <Card className="h-[350px] md:h-[500px] border-none shadow-lg flex flex-col">
                <CardHeader className="py-3 md:py-6">
                   <CardTitle className="flex justify-between items-center text-base md:text-xl">
-                                             <span>{t('calculator_motion_analysis')}</span>
-                                             <div className="flex gap-3">
-                                                <Badge variant="outline" className="text-xs md:text-sm font-normal">
-                                                   {t('calculator_one_way')}: <span className="font-bold ml-1">{results?.totalTime || '0.000'} s</span>
-                                                </Badge>
-                                                <Badge variant="outline" className="text-xs md:text-sm font-normal bg-blue-50">
-                                                   {t('calculator_cycle')}: <span className="font-bold ml-1">{results?.totalTime ? (parseFloat(results.totalTime) * 2).toFixed(3) : '0.000'} s</span>
-                                                </Badge>
-                                             </div>
-                                          </CardTitle>
+                     <span>{t('calculator_motion_analysis')}</span>
+                     <div className="flex gap-3">
+                        <Badge variant="outline" className="text-xs md:text-sm font-normal">
+                           {t('calculator_one_way')}: <span className="font-bold ml-1">{results?.totalTime || '0.000'} s</span>
+                        </Badge>
+                        <Badge variant="outline" className="text-xs md:text-sm font-normal bg-blue-50">
+                           {t('calculator_cycle')}: <span className="font-bold ml-1">{results?.totalTime ? (parseFloat(results.totalTime) * 2).toFixed(3) : '0.000'} s</span>
+                        </Badge>
+                     </div>
+                  </CardTitle>
                </CardHeader>
                <CardContent className="flex-grow min-h-0 p-1 md:p-6">
                   {results?.data ? (
