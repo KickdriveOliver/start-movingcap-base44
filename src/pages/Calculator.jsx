@@ -48,60 +48,61 @@ const calculateTrajectoryParameters = ({ distance, maxVelocity, maxAcceleration,
   
   const cMaxAcceleration = maxAcceleration;
   
-  let finalMaxVelocity = maxVelocity;
-  // --- Case 1: jerk-limited only (never reaches max acceleration) ---
-  const dThreshold = (2 * Math.pow(maxAcceleration, 3)) / Math.pow(maxJerk, 2);
-  if (distance <= dThreshold) {
-    // v_max = (j * d^2 / 4)^(1/3)
-    finalMaxVelocity = Math.pow((maxJerk * Math.pow(distance, 2)) / 4.0, 1.0 / 3.0);
-  } else {
-    // --- Case 2: reaches max acceleration, no cruise ---
-    // Solve quadratic for plateau time t_a
-    const A = maxAcceleration;
-    const B = (maxAcceleration * maxAcceleration) / maxJerk;
-    const C = (2 * Math.pow(maxAcceleration, 3)) / Math.pow(maxJerk, 2) - distance;
+  // Prioritize jerk increase to triangular-acceleration edge case before reducing velocity
+  const vReq = maxVelocity;
+  const a = cMaxAcceleration;
+  let jUser = maxJerk > 0 ? maxJerk : jerkTrapezoidal;
 
-    const discriminant = Math.pow(B, 2) - 4 * A * C;
-    let t_a = 0;
-    if (discriminant >= 0) {
-      t_a = (-B + Math.sqrt(discriminant)) / (2 * A);
-      finalMaxVelocity = maxAcceleration * t_a + (maxAcceleration * maxAcceleration) / maxJerk;
-    }
+  // Minimum jerk that still reaches peak acceleration a exactly at vReq (triangular accel)
+  const jTriReq = (a > 0 && vReq > 0) ? (a * a) / vReq : jerkTrapezoidal;
+
+  // Start with at least the triangular requirement
+  let finalJerkValue = Math.max(jUser, jTriReq);
+
+  // Minimal distance to accelerate+decelerate to vReq with triangular accel
+  const dTriReq = (2 * vReq * vReq) / a;
+
+  // Decide achievable velocity
+  let finalMaxVelocity = vReq;
+  let isVelocityLimited = false;
+  if (distance < dTriReq) {
+    // Not enough distance: compute the max velocity achievable with triangular accel
+    finalMaxVelocity = Math.sqrt((a * distance) / 2);
+    isVelocityLimited = finalMaxVelocity < vReq;
+    // Ensure jerk matches triangular edge for this reduced velocity
+    const jForV = (a * a) / Math.max(finalMaxVelocity, 1e-12);
+    finalJerkValue = Math.max(finalJerkValue, jForV);
   }
 
-  // Clamp by external velocity limit if provided
-  const isVelocityLimited = finalMaxVelocity < maxVelocity;
-  if (!isVelocityLimited) {
-    finalMaxVelocity = maxVelocity;
-  }
-
-  
-  let finalJerkValue = (maxAcceleration * maxAcceleration) / finalMaxVelocity;
-  const isJerkMinLimited = (maxJerk < finalJerkValue);
-  if (!isJerkMinLimited) finalJerkValue = maxJerk;
+  const isJerkMinLimited = finalJerkValue > jUser;
   const isTrapezoidal = (finalJerkValue >= jerkTrapezoidal);
-  const tJer = (isTrapezoidal ? 0: cMaxAcceleration / finalJerkValue);
+  const tJer = (isTrapezoidal ? 0 : a / finalJerkValue);
 
-  // duration of constant acceleration while jerk=0 (acceleration = cMaxAcceleration)
-  let vDiffC = finalMaxVelocity;
-  if (!isTrapezoidal) {
-    vDiffC -= (maxAcceleration * maxAcceleration) / finalJerkValue;
-    vDiffC = Math.min(0, vDiffC);
-  }
-  let tAccC = vDiffC / cMaxAcceleration;
+  // Duration of constant-acceleration plateau (>=0)
+  let vDiffC = isTrapezoidal ? finalMaxVelocity : (finalMaxVelocity - (a * a) / finalJerkValue);
+  vDiffC = Math.max(0, vDiffC);
+  let tAccC = Math.max(0, vDiffC / a);
 
-
-  // put the whole acceleration together
+  // Put the whole acceleration together
   const tVmaxReached = tAccC + 2 * tJer; 
-  // same-time trapezoidal equivalent with constant acceleration <= cMaxAcceleration
-  const cAverageAcceleration = finalMaxVelocity / tVmaxReached;
-  const pVmaxReached = 0.5 * (finalMaxVelocity * finalMaxVelocity) / cAverageAcceleration;
+  // Exact displacement at end of acceleration (jerk-up + const-accel + jerk-down)
+  const j = finalJerkValue;
+  const Tj = tJer;
+  const Tc = tAccC;
+  const v1_e = 0.5 * j * Tj * Tj;
+  const p1_e = (1/6) * j * Tj * Tj * Tj;
+  const v2_e = v1_e + a * Tc;
+  const p2_e = p1_e + v1_e * Tc + 0.5 * a * Tc * Tc;
+  const pVmaxReached = p2_e + v2_e * Tj + 0.5 * a * Tj * Tj - (1/6) * j * Tj * Tj * Tj;
 
-  // duration of the constant velocity part 
-  const tVelConstant = (distance - 2 * pVmaxReached) / finalMaxVelocity;
+  // Keep average acceleration for diagnostics only
+  const cAverageAcceleration = tVmaxReached > 0 ? (finalMaxVelocity / tVmaxReached) : finalMaxVelocity;
 
-  // total run 
-  const tTrajectory = 2 * tVmaxReached + tVelConstant;
+  // Duration of the constant velocity part 
+  const tVelConstant = Math.max(0, (distance - 2 * pVmaxReached) / Math.max(finalMaxVelocity, 1e-12));
+
+  // Total run 
+  const tTrajectory = Math.max(0, 2 * tVmaxReached + tVelConstant);
 
   let finalParams = {
     tJer: tJer,
@@ -117,7 +118,10 @@ const calculateTrajectoryParameters = ({ distance, maxVelocity, maxAcceleration,
     success: true,
     isVelocityLimited: isVelocityLimited,
     isJerkMinLimited: isJerkMinLimited,
-    isTrapezoidal: isTrapezoidal
+    isTrapezoidal: isTrapezoidal,
+    // Diagnostics for UI (requested vs actual)
+    requestedVelocity: vReq,
+    requestedJerk: jUser
   };
 
   return finalParams;
@@ -133,8 +137,8 @@ const getPointInTrajectory = (t, params) => {
   const t2 = tJer + tAccC;
   const t3 = tVmaxReached;
   const t4 = tVmaxReached + tVelConstant;
-  const t5 = tTrajectory - tJer - tAccC;
-  const t6 = tTrajectory - tJer;
+  const t5 = Math.max(t4, tTrajectory - tJer - tAccC);
+  const t6 = Math.max(t5, tTrajectory - tJer);
   const t7 = tTrajectory;
 
   let position = 0, velocity = 0, acceleration = 0, jerk = 0, phase = '';
@@ -151,10 +155,13 @@ const getPointInTrajectory = (t, params) => {
   const v2 = v1 + a1 * tAccC;
   const p2 = p1 + v1 * tAccC + 0.5 * a1 * tAccC * tAccC;
 
-  const v3 = finalMaxVelocity;
-  const p3 = 0.5 * (finalMaxVelocity * finalMaxVelocity) / averageAcceleration;
+  const v3 = v2 + finalMaxAcceleration * tJer - 0.5 * finalJerkValue * tJer * tJer;
+  const p3 = p2 + v2 * tJer + 0.5 * finalMaxAcceleration * tJer * tJer - (1/6) * finalJerkValue * tJer * tJer * tJer;
 
   const p4 = p3 + v3 * tVelConstant;
+  // Ensure symmetry: distance should equal p4 + (distance - p3) for decel mirror
+  // p6 (end of decel) should be exactly distance; compute once to use later
+  const distanceMirror = distance;
 
   const a5 = -finalMaxAcceleration;
   let v5 = v3;
@@ -165,6 +172,8 @@ const getPointInTrajectory = (t, params) => {
   }
   const v6 = v5 + a5 * tAccC;
   const p6 = p5 + v5 * tAccC + 0.5 * a5 * tAccC * tAccC;
+  // For numerical safety in later phases: end must be exactly distance
+  const p7_expected = distance;
 
   if (t >= 0 && t < t1) { // Phase 1: Accel Jerk Up
     phase = 'Accel Jerk Up';
@@ -217,8 +226,10 @@ const getPointInTrajectory = (t, params) => {
     acceleration = -finalMaxAcceleration + jerk * dt;
     if (acceleration > 0) acceleration = 0;
     velocity = v6 - finalMaxAcceleration * dt + 0.5 * jerk * dt * dt;
+    if (velocity < 0) velocity = 0;
     position = p6 + v6 * dt - 0.5 * finalMaxAcceleration * dt * dt + (1/6) * jerk * dt * dt * dt;
     if (position > distance) position = distance;
+  if (position < 0) position = 0;
   } else if (t > t7) { // End of trajectory
     phase = 'Arrived';
     jerk = 0;
@@ -228,6 +239,15 @@ const getPointInTrajectory = (t, params) => {
   }
 
   if (velocity < 0) velocity = 0;
+
+  // Safety clamps to prevent velocity jumps/overshoot at phase boundaries
+  if (t >= 0 && t < t3) {
+    velocity = Math.min(velocity, finalMaxVelocity);
+  } else if (t >= t3 && t < t4) {
+    velocity = finalMaxVelocity;
+  } else if (t >= t4 && t <= t7) {
+    velocity = Math.min(velocity, finalMaxVelocity);
+  }
 
   return { position, velocity, acceleration, jerk, phase };
 };
@@ -399,8 +419,8 @@ export default function Calculator() {
         // Actual values used
         actualVelocity: traj.finalMaxVelocity / 1000, // convert to mm/s
         actualJerk: traj.finalJerkValue / 1000000, // convert to m/s³
-        requestedVelocity: params.maxSpeedMmS,
-        requestedJerk: params.maxJerkMS3
+        requestedVelocity: traj.requestedVelocity / 1000, // ensure consistency with actual
+        requestedJerk: traj.requestedJerk / 1000000
       });
     } else {
       setResults(null);

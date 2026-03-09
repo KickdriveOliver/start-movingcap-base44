@@ -79,7 +79,7 @@ export const products = [
     application_keys: ['product_shorttrack_app1', 'product_shorttrack_app2'],
     technical_specs: {
       max_stroke_mm: 46,
-      max_force_n: 9,
+      max_force_n: 28,
       max_speed_mm_s: 1800,
       moving_mass_g: 450
     },
