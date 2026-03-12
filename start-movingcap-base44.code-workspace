@@ -4,5 +4,12 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"chat.tools.terminal.autoApprove": {
+			"/^Get-ChildItem \"e:\\\\dev\\\\start-movingcap-base44\\\\\\.planning\\\\codebase\\\\\\*\\.md\" \\| ForEach-Object \\{ \\$lines = \\(Get-Content \\$_\\.FullName \\| Measure-Object -Line\\)\\.Lines; \"\\$\\(\\$_\\.Name\\) \\(\\$lines lines\\)\" \\}$/": {
+				"approve": true,
+				"matchCommandLine": true
+			}
+		}
+	}
 }
