@@ -6,7 +6,7 @@ This migration takes the existing MovingCap React SPA from the Base44 platform t
 
 ## Phases
 
-- [ ] **Phase 1: Platform Decoupling** - Remove all Base44 dependencies so the app builds and runs standalone
+- [x] **Phase 1: Platform Decoupling** - Remove all Base44 dependencies so the app builds and runs standalone
 - [ ] **Phase 2: Asset Localization & Route Restructuring** - Localize all external images, convert to hash routing, clean up i18n
 - [ ] **Phase 3: Build, PWA & Deployment** - Add PWA support, configure subfolder deployment, create build instructions
 
@@ -25,9 +25,9 @@ This migration takes the existing MovingCap React SPA from the Base44 platform t
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Remove @base44/vite-plugin and SDK, fix vite.config.js and build
-- [ ] 01-02: Strip AuthContext, NavigationTracker, VisualEditAgent, app-params, PageNotFound auth
-- [ ] 01-03: Remove unused dependencies and dead pages, verify clean build
+- [x] 01-01: Remove @base44/vite-plugin and SDK, fix vite.config.js and build
+- [x] 01-02: Strip AuthContext, NavigationTracker, VisualEditAgent, app-params, PageNotFound auth
+- [x] 01-03: Remove unused dependencies and dead pages, verify clean build
 
 ### Phase 2: Asset Localization & Route Restructuring
 **Goal**: All images are local, routes use hash routing, i18n files are cleaned up
@@ -67,10 +67,10 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Platform Decoupling | 0/3 | Not started | - |
+| 1. Platform Decoupling | 3/3 | Complete | 2026-03-12 |
 | 2. Asset Localization & Routing | 0/3 | Not started | - |
 | 3. Build, PWA & Deployment | 0/3 | Not started | - |
 
 ---
 *Roadmap created: 2026-03-12*
-*Last updated: 2026-03-12 after initialization*
+*Last updated: 2026-03-12 after Phase 1 execution*

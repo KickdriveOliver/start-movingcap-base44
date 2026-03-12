@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-03-12)
 
 **Core value:** The product catalog and motion calculator must work flawlessly as a fully offline-capable static site with zero external service dependencies.
-**Current focus:** Phase 1 — Platform Decoupling
+**Current focus:** Phase 2 — Asset Localization & Route Restructuring
 
 ## Current Position
 
-Phase: 1 of 3 (Platform Decoupling)
+Phase: 2 of 3 (Asset Localization & Route Restructuring)
 Plan: 0 of 3 in current phase
-Status: Planned — ready to execute
-Last activity: 2026-03-12 — Phase 1 planned (3 plans in 3 waves)
+Status: Ready to execute
+Last activity: 2026-03-12 — Phase 1 executed (3/3 plans complete, verification passed)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 3
+- Average duration: 13.7 min
+- Total execution time: 0.7 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 1 (Platform Decoupling) | 3 | 41 min | 13.7 min |
 
 **Recent Trend:**
-- Last 5 plans: -
-- Trend: -
+- Last 5 plans: 01-01, 01-02, 01-03
+- Trend: Stable (all planned tasks completed without blockers)
 
 *Updated after each plan completion*
 
@@ -46,6 +46,8 @@ Recent decisions affecting current work:
 - [Init]: Strip all Base44 code completely — auth never enforced, clean removal
 - [Init]: Remove all dead code and unused dependencies — leaner build
 - [Init]: Subfolder deployment — site may live at a subpath
+- [Exec-01-01]: Keep explicit route path compatibility with `createPageUrl()` outputs (`/landing`, `/productdetail`) while removing dynamic pages config
+- [Exec-01-03]: Use fixed light Sonner theme and remove `next-themes` to preserve functionality without introducing new theme infrastructure
 
 ### Key Research Findings
 
@@ -57,14 +59,14 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- Start Phase 2 Plan 02-01: localize all external image assets used by landing/products pages.
 
 ### Blockers/Concerns
 
-None yet.
+None. Minor existing build warnings remain in `src/components/i18n/translations.jsx` (duplicate object keys) but do not block current phase progression.
 
 ## Session Continuity
 
 Last session: 2026-03-12
-Stopped at: Phase 1 planning complete — 3 plans created, verified, ready for execution
+Stopped at: Phase 1 execution complete — summaries and phase verification written
 Resume file: None
