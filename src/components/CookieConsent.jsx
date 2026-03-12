@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import { useTranslations } from "@/components/useTranslations";
 
 export default function CookieConsent() {
@@ -58,15 +57,15 @@ export default function CookieConsent() {
                 {t('cookie_consent_privacy_link')}
               </a>.
               {" "}{t('cookie_consent_more_info')}{" "}
-              <Link 
-                to={createPageUrl("Datenschutz")} 
+                <Link 
+                  to="/datenschutz" 
                 className="text-blue-600 hover:underline"
               >
                 {t('privacy_title')}
               </Link>{" "}
               {t('cookie_consent_and_in')}{" "}
-              <Link 
-                to={createPageUrl("Impressum")} 
+                <Link 
+                  to="/impressum" 
                 className="text-blue-600 hover:underline"
               >
                 {t('imprint_title')}

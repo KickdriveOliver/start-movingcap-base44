@@ -6,7 +6,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { ArrowRight, Check, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "@/components/useTranslations";
-import { createPageUrl } from "@/utils";
 import { products } from "@/components/data/products";
 
 export default function Products() {
@@ -164,7 +163,7 @@ export default function Products() {
                 </CardContent>
                 <CardFooter>
                   <Button className="w-full" asChild>
-                    <Link to={createPageUrl(`ProductDetail?series=${product.series}`)}>
+                    <Link to={`/product/${product.id}`}>
                       {t('learn_more')}
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Link>

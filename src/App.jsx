@@ -1,6 +1,6 @@
 import './App.css'
 import { Toaster } from "@/components/ui/toaster"
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 import Layout from './Layout';
 import Landing from '@/pages/Landing';
 import Products from '@/pages/Products';
@@ -14,13 +14,12 @@ import NotFound from '@/pages/NotFound';
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Layout>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/landing" element={<Landing />} />
           <Route path="/products" element={<Products />} />
-          <Route path="/productdetail" element={<ProductDetail />} />
+          <Route path="/product/:slug" element={<ProductDetail />} />
           <Route path="/calculator" element={<Calculator />} />
           <Route path="/documentation" element={<Documentation />} />
           <Route path="/impressum" element={<Impressum />} />
@@ -29,7 +28,7 @@ function App() {
         </Routes>
       </Layout>
       <Toaster />
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 

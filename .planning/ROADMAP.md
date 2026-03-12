@@ -7,7 +7,7 @@ This migration takes the existing MovingCap React SPA from the Base44 platform t
 ## Phases
 
 - [x] **Phase 1: Platform Decoupling** - Remove all Base44 dependencies so the app builds and runs standalone
-- [ ] **Phase 2: Asset Localization & Route Restructuring** - Localize all external images, convert to hash routing, clean up i18n
+- [x] **Phase 2: Asset Localization & Route Restructuring** - Localize all external images, convert to hash routing, clean up i18n
 - [ ] **Phase 3: Build, PWA & Deployment** - Add PWA support, configure subfolder deployment, create build instructions
 
 ## Phase Details
@@ -42,9 +42,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: Download all external images and update product data / page references
-- [ ] 02-02: Convert to HashRouter and restructure product detail routing
-- [ ] 02-03: Rename i18n files and update imports
+- [x] 02-01: Download all external images and update product data / page references
+- [x] 02-02: Convert to HashRouter and restructure product detail routing
+- [x] 02-03: Rename i18n files and update imports
 
 ### Phase 3: Build, PWA & Deployment
 **Goal**: Build output is a deployable static site with PWA offline support
@@ -68,9 +68,9 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Platform Decoupling | 3/3 | Complete | 2026-03-12 |
-| 2. Asset Localization & Routing | 0/3 | Not started | - |
+| 2. Asset Localization & Routing | 3/3 | Complete | 2026-03-12 |
 | 3. Build, PWA & Deployment | 0/3 | Not started | - |
 
 ---
 *Roadmap created: 2026-03-12*
-*Last updated: 2026-03-12 after Phase 1 execution*
+*Last updated: 2026-03-12 after Phase 2 execution*

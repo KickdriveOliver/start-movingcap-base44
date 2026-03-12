@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { ArrowRight, ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import { useTranslations } from "@/components/useTranslations";
 import { products } from "@/components/data/products";
 
@@ -113,37 +112,37 @@ export default function Landing() {
     { 
       series: "turnTRACK", 
       name: "MovingCap turnTRACK", 
-      img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/e86935_ani-001.jpg" 
+      img: "/images/movingcap-turntrack.jpg" 
     },
     { 
       series: "maxTRACK", 
       name: "MovingCap maxTRACK", 
-      img: "https://fullmo.de/assets/img/moving-cap-001b.jpg"
+      img: "/images/movingcap-maxtrack.jpg"
     },
     { 
       series: "FATtrack", 
       name: "MovingCap FATtrack", 
-      img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/680263821ec9d2a88d7e42e5/33c66611d_fattrack_photo-removebg-preview.jpg"
+      img: "/images/movingcap-fattrack.jpg"
     },
     { 
       series: "flatTRACK", 
       name: "MovingCap flatTRACK", 
-      img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/dc47a5_moving-cap-004b.jpg"
+      img: "/images/movingcap-flattrack.jpg"
     },
     { 
       series: "shortTRACK", 
       name: "MovingCap shortTRACK", 
-      img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/343056_moving-cap-005b.jpg"
+      img: "/images/movingcap-shorttrack.jpg"
     },
     { 
       series: "pushTRACK", 
       name: "MovingCap pushTRACK", 
-      img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/a08b24_moving-cap-002b.jpg"
+      img: "/images/movingcap-pushtrack.jpg"
     },
     { 
       series: "sideTRACK", 
       name: "MovingCap sideTRACK", 
-      img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/680263821ec9d2a88d7e42e5/7c23351f9_sideTRACK_product_photo.jpg"
+      img: "/images/movingcap-sidetrack.jpg"
     }
   ];
 
@@ -164,7 +163,7 @@ export default function Landing() {
             transition={{ duration: 1 }}
             className="absolute inset-0 bg-gradient-to-br from-blue-600/40 via-gray-900/80 to-gray-900 z-10"
           />
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518124624242-286524c3c3b5?auto=format&fit=crop&w=1740&q=80')] bg-cover bg-center opacity-30" />
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-slate-800 to-zinc-900 opacity-40" />
         </div>
         
         <div className="container mx-auto px-4 py-24 md:py-32 relative z-10">
@@ -189,7 +188,7 @@ export default function Landing() {
                   className="bg-blue-600 hover:bg-blue-700"
                   asChild
                 >
-                  <Link to={createPageUrl("Products")}>
+                  <Link to="/products">
                     {t('explore_products')}
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Link>
@@ -200,7 +199,7 @@ export default function Landing() {
                   className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white hover:text-gray-900"
                   asChild
                 >
-                  <Link to={createPageUrl("Calculator")}>
+                  <Link to="/calculator">
                     {t('motion_calculator')}
                     <ChevronRight className="ml-2 w-5 h-5" />
                   </Link>
@@ -250,7 +249,7 @@ export default function Landing() {
                     ))}
                   </ul>
                   <Button className="w-full mt-auto" asChild>
-                    <Link to={createPageUrl(`ProductDetail?series=${item.series}`)}>
+                    <Link to={`/product/${item.id}`}>
                       {t('learn_more')}
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Link>
@@ -277,7 +276,7 @@ export default function Landing() {
             {[
               {
                 title: t('integrated_control'),
-                image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/dc47a5_moving-cap-004b.jpg",
+                image: "/images/movingcap-flattrack.jpg",
                 features: [
                   t('ethercat_interface'),
                   t('ethernet_tcpip_sockets'),
@@ -287,7 +286,7 @@ export default function Landing() {
               },
               {
                 title: t('precision_engineering'),
-                image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/343056_moving-cap-005b.jpg",
+                image: "/images/movingcap-shorttrack.jpg",
                 features: [
                   t('absolute_position_no_ref'),
                   t('micrometer_accuracy'),
@@ -297,7 +296,7 @@ export default function Landing() {
               },
               {
                 title: t('flexible_integration'),
-                image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/a08b24_moving-cap-002b.jpg",
+                image: "/images/movingcap-pushtrack.jpg",
                 features: [
                   t('mounting_options'),
                   t('industrial_connectors'),
@@ -353,7 +352,7 @@ export default function Landing() {
                 className="bg-blue-600 hover:bg-blue-700"
                 asChild
               >
-                <Link to={createPageUrl("Products")}>
+                <Link to="/products">
                   {t('view_all_products')}
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
@@ -363,7 +362,7 @@ export default function Landing() {
                 variant="outline"
                 asChild
               >
-                <Link to={createPageUrl("Calculator")}>
+                <Link to="/calculator">
                   {t('try_calculator')}
                   <ChevronRight className="ml-2 w-5 h-5" />
                 </Link>
