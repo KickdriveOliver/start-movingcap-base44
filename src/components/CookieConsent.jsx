@@ -44,19 +44,7 @@ export default function CookieConsent() {
               <strong>{t('cookie_consent_important')}:</strong> {t('cookie_consent_disclaimer')}
             </p>
             <p className="text-xs text-gray-600">
-              {t('cookie_consent_platform')}{" "}
-              <a href="https://base44.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                base44.com
-              </a>{" "}
-              {t('cookie_consent_platform_terms')}{" "}
-              <a href="https://base44.com/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                {t('cookie_consent_terms_link')}
-              </a>{" "}
-              {t('cookie_consent_and')}{" "}
-              <a href="https://base44.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                {t('cookie_consent_privacy_link')}
-              </a>.
-              {" "}{t('cookie_consent_more_info')}{" "}
+              {t('cookie_consent_more_info')}{" "}
                 <Link 
                   to="/datenschutz" 
                 className="text-blue-600 hover:underline"
