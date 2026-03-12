@@ -22,7 +22,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **ASSET-01**: Download all product images from Supabase storage to `src/assets/images/`
 - [ ] **ASSET-02**: Download all Landing page images from external URLs to `src/assets/images/`
 - [ ] **ASSET-03**: Update all image references in `products.jsx` and page components to use local paths
-- [ ] **ASSET-04**: Verify no remaining external asset URLs (supabase.co, fullmo.de) in source code
+- [ ] **ASSET-04**: Verify no remaining external asset image URLs (supabase.co, fullmo.de) in source code. (out-of-scope: keep external PDF URLs from movingcap.de)
 
 ### Route Restructuring
 
