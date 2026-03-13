@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import LanguageSelector from "./components/LanguageSelector";
 import { TranslationProvider, useTranslations } from "./components/useTranslations";
 import CookieConsent from "./components/CookieConsent";
+import OfflineIndicator from "./components/OfflineIndicator";
 
 const LayoutContent = ({ children, currentPageName }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -190,6 +191,9 @@ const LayoutContent = ({ children, currentPageName }) => {
 
       {/* Cookie Consent Banner */}
       <CookieConsent />
+
+      {/* Offline Status */}
+      <OfflineIndicator />
     </div>
   );
 };
