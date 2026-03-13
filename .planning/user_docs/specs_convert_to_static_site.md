@@ -1,0 +1,6 @@
+- Migrate the web app currently available at [start.movingcap.com](https://start.movingcap.com) away from the base44 platform
+- Desired target/result of this project is a self-contained build environment with tailwind and vite and/or other build components that are required to create the files that can be uploaded directly to a standard Apache webserver. 
+- the resulting web site should also run offline as PWA (or directly from a folder on a Windows/Linux computer), if this is feasible. 
+- provide self-contained build environment with tailwind and vite and/or other build components and clear build instructions or a simple make/makefile. 
+- Make sure that all images and other ressources are copied to an assets folder in this project, and are not loaded from supabase storage any more like in this example:  [e86935_ani-001.jpg](https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/e86935_ani-001.jpg) 
+- Avoid database backends and work with local browser JSON data structure / Javascript variables only.

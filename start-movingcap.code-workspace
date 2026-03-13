@@ -1,0 +1,99 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"chat.tools.terminal.autoApprove": {
+			"/^Get-ChildItem \"e:\\\\dev\\\\start-movingcap\\\\\\.planning\\\\codebase\\\\\\*\\.md\" \\| ForEach-Object \\{ \\$lines = \\(Get-Content \\$_\\.FullName \\| Measure-Object -Line\\)\\.Lines; \"\\$\\(\\$_\\.Name\\) \\(\\$lines lines\\)\" \\}$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs init execute-phase 1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs phase-plan-index 1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			}
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs init execute-phase 1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs phase-plan-index 1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^Push-Location firmware/test; gcc -DUNIT_TEST -I\\. -Iunity -I\\.\\. -c -Wall -Wextra \\.\\.\\\\src\\\\possensor\\\\possensor\\.c; Pop-Location$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs progress$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs roadmap analyze$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\./\\.claude/get-shit-done/bin/gsd-tools\\.cjs init phase-op 2$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^mkdir -p \"\\.planning/phases/02-register-access-watchdog-comprehensive-tests\"$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs init execute-phase 2$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs phase-plan-index 2$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^Set-Location firmware/test/test_runners; \\.\\\\test_runner\\.exe -v$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^Set-Location firmware/test; gcc -DUNIT_TEST test_runners/all_tests\\.c test_runners/test_accessauth_Runner\\.c test_accessauth\\.c test_runners/test_refgo_commands_Runner\\.c test_refgo_commands\\.c test_runners/test_mcsockets_Runner\\.c test_mcsocket_api\\.c test_runners/test_mcnet_api_Runner\\.c test_mcnet_api\\.c test_runners/test_possensor_Runner\\.c test_possensor\\.c unity/unity\\.c unity/unity_fixture\\.c unity/unity_memory\\.c -I\\. -Iunity -I\\.\\. -Wall -o test_runners/test_runner\\.exe; Set-Location test_runners; \\.\\\\test_runner\\.exe -v$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^Set-Location \\.\\.; gcc -DUNIT_TEST test_runners/all_tests\\.c test_runners/test_accessauth_Runner\\.c test_accessauth\\.c test_runners/test_refgo_commands_Runner\\.c test_refgo_commands\\.c test_runners/test_mcsockets_Runner\\.c test_mcsocket_api\\.c test_runners/test_mcnet_api_Runner\\.c test_mcnet_api\\.c test_runners/test_possensor_Runner\\.c test_possensor\\.c unity/unity\\.c unity/unity_fixture\\.c unity/unity_memory\\.c -I\\. -Iunity -I\\.\\. -Wall -o test_runners/test_runner\\.exe; Set-Location test_runners; \\.\\\\test_runner\\.exe -v$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs summary-extract \"\\.planning/phases/02-register-access-watchdog-comprehensive-tests/02-03-SUMMARY\\.md\" --fields one_liner$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs init plan-phase 3$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs roadmap get-phase 3$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs init execute-phase 3$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node \\.claude/get-shit-done/bin/gsd-tools\\.cjs phase-plan-index 3$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^\\$matches = Get-ChildItem -Path firmware/src -Recurse -Include \\*\\.c,\\*\\.h \\| Select-String -Pattern 'MHM_process_dma\\|MHM_Task\\|MHM_Dma_init\\|OP_PositionRead'; \\$filtered = \\$matches \\| Where-Object \\{ \\$_\\.Path -notmatch 'possensor_old' \\}; \\$filtered \\| ForEach-Object \\{ \"\\$\\(\\$_\\.Path\\):\\$\\(\\$_\\.LineNumber\\):\\$\\(\\$_\\.Line\\.Trim\\(\\)\\)\" \\}$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^\\$matches = Get-ChildItem -Path firmware/src -Recurse -Include \\*\\.c,\\*\\.h \\| Select-String -Pattern 'possensor_result_debug\\|possensor_rawdata_debug'; \\$filtered = \\$matches \\| Where-Object \\{ \\$_\\.Path -notmatch 'possensor_old' \\}; \\$filtered \\| ForEach-Object \\{ \"\\$\\(\\$_\\.Path\\):\\$\\(\\$_\\.LineNumber\\):\\$\\(\\$_\\.Line\\.Trim\\(\\)\\)\" \\}$/": {
+				"approve": true,
+				"matchCommandLine": true
+			}
+		}
+	}
+}

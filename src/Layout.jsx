@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import { Menu, X, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSelector from "./components/LanguageSelector";
 import { TranslationProvider, useTranslations } from "./components/useTranslations";
 import CookieConsent from "./components/CookieConsent";
+import OfflineIndicator from "./components/OfflineIndicator";
 
 const LayoutContent = ({ children, currentPageName }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,20 +16,20 @@ const LayoutContent = ({ children, currentPageName }) => {
       <header className="fixed top-0 w-full bg-white/80 backdrop-blur-sm z-50 border-b">
         <nav className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link to={createPageUrl("Landing")} className="flex items-center">
+            <Link to="/" className="flex items-center">
               <span className="text-xl font-bold text-blue-600">MovingCap</span>
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-4">
               <Link 
-                to={createPageUrl("Products")}
+                to="/products"
                 className="text-gray-600 hover:text-blue-600 transition-colors"
               >
                 {t('products')}
               </Link>
               <Link 
-                to={createPageUrl("Documentation")}
+                to="/documentation"
                 className="text-gray-600 hover:text-blue-600 transition-colors"
               >
                 {t('documentation')}
@@ -40,7 +40,7 @@ const LayoutContent = ({ children, currentPageName }) => {
                 asChild
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                <Link to={createPageUrl("Calculator")}>
+                <Link to="/calculator">
                   <Calculator className="w-4 h-4 mr-2" />
                   {t('motion_calculator')}
                 </Link>
@@ -59,7 +59,7 @@ const LayoutContent = ({ children, currentPageName }) => {
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                <Link to={createPageUrl("Calculator")}>
+                <Link to="/calculator">
                   <Calculator className="w-4 h-4" />
                 </Link>
               </Button>
@@ -88,21 +88,21 @@ const LayoutContent = ({ children, currentPageName }) => {
             <div className="md:hidden py-4">
               <div className="flex flex-col gap-2">
                 <Link 
-                  to={createPageUrl("Products")}
+                  to="/products"
                   className="text-gray-600 hover:text-blue-600 transition-colors px-2 py-1"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {t('products')}
                 </Link>
                 <Link 
-                  to={createPageUrl("Documentation")}
+                  to="/documentation"
                   className="text-gray-600 hover:text-blue-600 transition-colors px-2 py-1"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {t('documentation')}
                 </Link>
                 <Link 
-                  to={createPageUrl("Calculator")}
+                  to="/calculator"
                   className="text-gray-600 hover:text-blue-600 transition-colors px-2 py-1"
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -136,19 +136,19 @@ const LayoutContent = ({ children, currentPageName }) => {
               <h3 className="font-semibold text-lg mb-3">{t('quick_links')}</h3>
               <div className="flex flex-col gap-2">
                 <Link 
-                  to={createPageUrl("Products")}
+                  to="/products"
                   className="text-sm text-gray-600 hover:text-blue-600"
                 >
                   {t('products')}
                 </Link>
                 <Link 
-                  to={createPageUrl("Documentation")}
+                  to="/documentation"
                   className="text-sm text-gray-600 hover:text-blue-600"
                 >
                   {t('documentation')}
                 </Link>
                 <Link 
-                  to={createPageUrl("Calculator")}
+                  to="/calculator"
                   className="text-sm text-gray-600 hover:text-blue-600"
                 >
                   {t('motion_calculator')}
@@ -160,13 +160,13 @@ const LayoutContent = ({ children, currentPageName }) => {
               <h3 className="font-semibold text-lg mb-3">{t('legal')}</h3>
               <div className="flex flex-col gap-2">
                 <Link 
-                  to={createPageUrl("Impressum")}
+                  to="/impressum"
                   className="text-sm text-gray-600 hover:text-blue-600"
                 >
                   {t('imprint_title')}
                 </Link>
                 <Link 
-                  to={createPageUrl("Datenschutz")}
+                  to="/datenschutz"
                   className="text-sm text-gray-600 hover:text-blue-600"
                 >
                   {t('privacy_title')}
@@ -191,6 +191,9 @@ const LayoutContent = ({ children, currentPageName }) => {
 
       {/* Cookie Consent Banner */}
       <CookieConsent />
+
+      {/* Offline Status */}
+      <OfflineIndicator />
     </div>
   );
 };

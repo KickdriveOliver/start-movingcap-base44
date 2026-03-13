@@ -1,27 +1,23 @@
 import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Download, ChevronLeft, Check, Info, Settings, FileText } from "lucide-react";
 import { useTranslations } from "@/components/useTranslations";
-import { createPageUrl } from "@/utils";
 import { products } from "@/components/data/products";
 
 export default function ProductDetail() {
   const { t, currentLang } = useTranslations();
   const navigate = useNavigate();
-  
-  // Get series from URL query params
-  const urlParams = new URLSearchParams(window.location.search);
-  const seriesParam = urlParams.get('series');
+  const { slug } = useParams();
   
   // Get product from static data (case-insensitive lookup)
   const staticProduct = useMemo(() => {
-    if (!seriesParam) return null;
-    return products.find(p => p.series.toLowerCase() === seriesParam.toLowerCase());
-  }, [seriesParam]);
+    if (!slug) return null;
+    return products.find(p => p.id.toLowerCase() === slug.toLowerCase());
+  }, [slug]);
   const [displayImage, setDisplayImage] = useState(staticProduct?.image_url);
 
   // NEW: per-series fallback feature keys (same as Products page)
@@ -85,7 +81,7 @@ export default function ProductDetail() {
           <Button
             variant="ghost"
             className="mb-4"
-            onClick={() => navigate(createPageUrl("Products"))}
+            onClick={() => navigate("/products")}
           >
             <ChevronLeft className="w-4 h-4 mr-1" /> {t('back_to_products') || "Back to Products"}
           </Button>
@@ -240,13 +236,13 @@ export default function ProductDetail() {
             <div className="mt-6 grid grid-cols-2 gap-4">
               <Button 
                 className="bg-blue-600 hover:bg-blue-700" 
-                onClick={() => navigate(createPageUrl("Calculator"))}
+                onClick={() => navigate("/calculator")}
               >
                 {t('motion_calculator') || "Motion Calculator"}
               </Button>
               <Button 
                 variant="outline"
-                onClick={() => navigate(createPageUrl("Documentation"))}
+                onClick={() => navigate("/documentation")}
               >
                 {t('technical_documentation') || "Technical Documentation"}
               </Button>
