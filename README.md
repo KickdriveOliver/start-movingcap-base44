@@ -1,6 +1,44 @@
-# MovingCap Static Site
+# MovingCap Start App
 
-Product catalog and motion calculator for MovingCap servo drives. This project is a React single-page application (SPA) with PWA support for offline use after first load.
+Product catalog and motion calculator for [MovingCap Servo Drives](https://movingcap.com) from [Fullmo GmbH](https://fullmo.de). This project is a React single-page application (SPA) with PWA support for offline use after first load.
+
+> **Migration demo**: This repository documents a successful one-shot migration of a [Base 44](https://base44.com) AI-builder prototype to a self-hosted static site with PWA offline support — deployed on a standard Apache web server. It demonstrates the productive use of the amazing [GSD get-shit-done](https://github.com/gsd-build/get-shit-done) meta-prompting framework within a Windows / VS Code / Copilot / Claude / GPT / Gemini mixed environment. 
+
+## Base44 Migration Process
+
+This project started as a rapid prototype built entirely inside [Base 44](https://base44.com). The goal was to migrate it to a conventional, self-hosted React SPA without manual rewriting. 
+
+### Toolchain & Steps
+
+1. **Prepare data layer while still in Base44**
+   Prompt the Base 44 builder to replace its data management for translation and product data with local static JSON/JS data storage. A approach similar to this [cat-based coding style](https://talktomachines.blogspot.com/2025/12/cat-based-coding-in-2025-can-i-haz.html) has worked well here.
+
+2. **Export from Base 44**
+   The Base 44 "Builder" plan allows exporting to a `.zip` archive.
+
+3. **Import into VS Code workspace**
+   Create a [VS Code](https://code.visualstudio.com/) / GitHub Copilot Pro workspace and copy the `.zip` contents there. 
+
+4. **Set up GSD (get-shit-done)**
+   Install the [VS Code / no-git fork of GSD](https://github.com/KickdriveOliver/get-shit-done/tree/feature/vscode-copilot-win-no-git) - see also the original and updated [GSD get-shit-done](https://github.com/gsd-build/get-shit-done) for Claude Code. 
+
+5. **Map the codebase**
+   Run `/gsd-map-codebase` to analyze the base44 project structure and dependencies.
+
+6. **Write conversion requirements** in a free text specification file:
+   [`specs_convert_to_static_site.md`](https://github.com/KickdriveOliver/start-movingcap-base44/blob/main/.planning/user_docs/specs_convert_to_static_site.md)
+
+7. **Launch the migration**
+   ```
+   /gsd-new-project convert this web project as described in .planning/user_docs/specs_convert_to_static_site.md
+   ```
+   GSD drives the full planning → execution → verification cycle.
+
+8. **Interactive mode with model selection**
+   Use GSD's interactive discussion and verification phases. Model allocation that worked well for this project:
+   - **Claude Opus 4.6** — GSD plan and verify
+   - **GPT 5.3** — GSD execute
+
 
 ## Features
 
