@@ -39,7 +39,7 @@ Produce a deployable static build with PWA offline support and clear build/deplo
 - Instructions written into **README.md** (replace current placeholder README)
 
 ### Final Cleanup
-- Rename `package.json` name from `base44-app` to proper project name (e.g. `movingcap-site`)
+- Rename `package.json` name from `base44-app` to proper project name (e.g. `movingcap-start`)
 - Scan for and remove any remaining Base44 references across the project
 - Verify build output is clean and self-contained
 

@@ -40,7 +40,7 @@ completed: 2026-03-13
 ## Accomplishments
 
 - Added `base: process.env.VITE_BASE_URL || './'` to `vite.config.js`.
-- Updated package name from `base44-app` to `movingcap-site`.
+- Updated package name from `base44-app` to `movingcap-start`.
 - Removed stale manifest link from source `index.html`.
 - Switched favicon reference to relative path (`favicon.svg`).
 - Verified `dist/index.html` emits relative asset links (`./assets/...`).
@@ -57,7 +57,7 @@ Git commits were skipped because `git.enabled` is `false` in `.planning/config.j
 ## Files Created/Modified
 
 - `vite.config.js` - added env-driven base path
-- `package.json` - renamed project package to `movingcap-site`
+- `package.json` - renamed project package to `movingcap-start`
 - `index.html` - removed stale manifest link, set relative favicon path
 
 ## Deviations from Plan
