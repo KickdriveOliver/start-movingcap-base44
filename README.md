@@ -42,30 +42,30 @@ Build output is generated in the `dist/` folder. Copy the full contents of `dist
 
 ### Custom Base Path (Subfolder Deployment)
 
-If deploying under a subfolder such as `https://example.com/movingcap/`, set `VITE_BASE_URL` before building.
+If deploying under a subfolder such as `https://example.com/start/`, set `VITE_BASE_URL` before building.
 
 Linux/macOS:
 
 ```bash
-VITE_BASE_URL=/movingcap/ npm run build
+VITE_BASE_URL=/start/ npm run build
 ```
 
 Windows PowerShell:
 
 ```powershell
-$env:VITE_BASE_URL="/movingcap/"; npm run build
+$env:VITE_BASE_URL="/start/"; npm run build
 ```
 
 Windows CMD:
 
 ```cmd
-set VITE_BASE_URL=/movingcap/ && npm run build
+set VITE_BASE_URL=/start/ && npm run build
 ```
 
 Alternative via `.env` file in project root:
 
 ```env
-VITE_BASE_URL=/movingcap/
+VITE_BASE_URL=/start/
 ```
 
 ### Preview Build Locally
@@ -84,7 +84,7 @@ npm run preview
 Example Apache folder layout:
 
 ```text
-/var/www/html/movingcap/
+/var/www/html/start/
 ├── index.html
 ├── assets/
 ├── images/
