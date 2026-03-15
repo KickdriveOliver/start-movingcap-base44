@@ -117,7 +117,22 @@ npm run preview
 1. Build the project (`npm run build`)
 2. Copy everything from `dist/` to your Apache document root or target subfolder
 3. No `.htaccess` rewrite rules are required because routing is hash-based (`#/products`, `#/calculator`)
-4. Optionally add cache headers for static assets (`assets/*`, icons, images)
+4. Add HTTP cache headers for correct PWA update behavior:
+   - Serve `index.html`, `sw.js`, `registerSW.js`, and `manifest.webmanifest` with `Cache-Control: no-cache, no-store, must-revalidate`
+   - Serve static assets (`*.js`, `*.css`, images, fonts) with long cache (`max-age=31536000, immutable`)
+   - Use the ready-made Apache snippet in `deploy/apache-cache-headers.conf`
+
+### Apache Cache Header Snippet
+
+Use the file `deploy/apache-cache-headers.conf` and include it in your vhost config, or copy its content into a `.htaccess` file in the deployment root (if `AllowOverride FileInfo`/`AllowOverride All` is enabled).
+
+A ready-to-copy `.htaccess` template is also available in the project root.
+
+Example vhost include:
+
+```apache
+Include /path/to/start-movingcap/deploy/apache-cache-headers.conf
+```
 
 Example Apache folder layout:
 

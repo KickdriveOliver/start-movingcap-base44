@@ -249,7 +249,7 @@ export default function Landing() {
                     ))}
                   </ul>
                   <Button className="w-full mt-auto" asChild>
-                    <Link to={`/product/${item.id}`}>
+                    <Link to={`/product/${productsBySeries[item.series]?.id || item.series.toLowerCase()}`}>
                       {t('learn_more')}
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Link>
