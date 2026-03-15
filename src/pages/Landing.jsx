@@ -155,15 +155,15 @@ export default function Landing() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gray-900 text-white">
+      <section className="relative overflow-hidden bg-slate-50 text-slate-900">
         <div className="absolute inset-0">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
-            className="absolute inset-0 bg-gradient-to-br from-blue-600/40 via-gray-900/80 to-gray-900 z-10"
+            className="absolute inset-0 bg-gradient-to-br from-sky-100/80 via-white to-slate-100 z-10"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-slate-800 to-zinc-900 opacity-40" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-blue-50/50 via-transparent to-sky-50/50" />
         </div>
         
         <div className="container mx-auto px-4 py-24 md:py-32 relative z-10">
@@ -173,19 +173,19 @@ export default function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-slate-900">
                 {t('hero_title')}
               </h1>
-              <div className="text-2xl md:text-3xl font-semibold mb-4 text-blue-300">
+              <div className="text-2xl md:text-3xl font-semibold mb-4 text-sky-600">
                 {t('hero_subtitle')}
               </div>
-              <p className="text-xl text-gray-300 mb-8 max-w-2xl">
+              <p className="text-xl text-slate-600 mb-8 max-w-2xl">
                 {t('hero_description')}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Button 
                   size="lg"
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-blue-600 hover:bg-blue-700 text-white shadow-md"
                   asChild
                 >
                   <Link to="/products">
@@ -196,7 +196,7 @@ export default function Landing() {
                 <Button 
                   size="lg"
                   variant="outline"
-                  className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white hover:text-gray-900"
+                  className="bg-white/80 backdrop-blur-sm border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-blue-600 shadow-sm"
                   asChild
                 >
                   <Link to="/calculator">

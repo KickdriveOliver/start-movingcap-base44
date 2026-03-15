@@ -80,3 +80,4 @@ Resume file: .planning/phases/03-build-pwa-deployment/03-UAT.md
 | Date | Task | Directory | Result |
 |------|------|-----------|--------|
 | 2026-03-15 | Fix homepage `Learn More` product links (`/product/undefined`) | `.planning/quick/001-fix-homepage-learn-more-links` | Completed |
+| 2026-03-15 | Improve hero wording (`hero_title` Swap) | `.planning/quick/002-improve-hero-wording` | Completed |
