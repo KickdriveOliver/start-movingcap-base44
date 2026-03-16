@@ -1194,8 +1194,8 @@ export default function Calculator() {
         </div>
 
         {/* Version footer */}
-        <p className="text-[10px] text-gray-300 text-right mt-6 select-all">
-          Calculator {CALCULATOR_VERSION}
+        <p className="text-[10px] text-gray-600 text-right mt-6 select-all">
+          MovingCap MoCalc {CALCULATOR_VERSION}
         </p>
       </motion.div>
     </div>

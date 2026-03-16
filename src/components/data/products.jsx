@@ -48,7 +48,7 @@ export const products = [
       max_force_n: 100,
       max_speed_mm_s: 2000,
       moving_mass_g: 600,
-      nom_force_n: 20,
+      nom_force_n: 30,
       loss_force_n: 15,
       stroke_options_mm: [100, 195, 290, 485, 585, 650, 1325]
     },
@@ -72,7 +72,7 @@ export const products = [
       max_force_n: 150,
       max_speed_mm_s: 2000,
       moving_mass_g: 800,
-      nom_force_n: 20,
+      nom_force_n: 30,
       loss_force_n: 15,
       stroke_options_mm: [200]
     },
@@ -96,8 +96,8 @@ export const products = [
       max_force_n: 28,
       max_speed_mm_s: 1800,
       moving_mass_g: 450,
-      nom_force_n: 5,
-      loss_force_n: 2,
+      nom_force_n: 9,
+      loss_force_n: 4,
       stroke_options_mm: [46]
     },
     image_url: '/images/movingcap-shorttrack.jpg',
