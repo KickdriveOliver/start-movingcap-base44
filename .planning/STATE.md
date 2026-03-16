@@ -84,3 +84,4 @@ Resume file: .planning/phases/03-build-pwa-deployment/03-UAT.md
 | 2026-03-16 | Extend product data: long descriptions, technical specs, conditional calculator button | `.planning/quick/003-extend-product-data` | Completed |
 | 2026-03-16 | Show nom_force_n in calculator drive selection tiles | `.planning/quick/004-nom-force-calculator-tiles` | Completed |
 | 2026-03-16 | Improve motion calculator: process time, 3-value timing, continuous duty | `.planning/quick/005-improve-motion-calculator` | Completed |
+| 2026-03-16 | Fix force warning displaying unrealistically high value (string concat bug) | `.planning/quick/006-fix-force-warning-value` | Completed |

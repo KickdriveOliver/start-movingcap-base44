@@ -466,7 +466,7 @@ export default function Calculator() {
     // Force/Accel Check
     // Note: The calculated accel is already derived from max force. 
     // If user manually inputs higher accel, we check it.
-    const requiredForce = (physicsParams.motorMass + physicsParams.payloadMass) * params.maxAccelMS2 / 1000; // F=ma (mass in kg)
+    const requiredForce = (parseFloat(physicsParams.motorMass) + parseFloat(physicsParams.payloadMass)) * parseFloat(params.maxAccelMS2) / 1000; // F=ma (mass in kg)
     // Allow small epsilon (0.1%) for float comparison to prevent false positives on equality
     if (requiredForce > specs.max_force_n * 1.001) {
       checks.push({ 
