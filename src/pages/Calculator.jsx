@@ -266,6 +266,7 @@ export default function Calculator() {
     maxSpeedMmS: 1000,
     maxAccelMS2: 10,
     maxJerkMS3: 100,
+    processTimeMs: 10,
   });
   
   const [physicsParams, setPhysicsParams] = useState({
@@ -474,13 +475,46 @@ export default function Calculator() {
         param: 'force'
       });
     } else {
-      checks.push({ type: 'success', msg: `${t('calculator_force_usage')} ${Math.round(requiredForce/specs.max_force_n * 100)}%`, param: 'force' });
+      checks.push({ type: 'success', msg: `${t('calculator_peak_force_usage')} ${Math.round(requiredForce/specs.max_force_n * 100)}%`, param: 'force' });
+    }
+
+    // Continuous duty check (average force over one-way time vs nominal force)
+    if (specs.nom_force_n && results?.data && results?.totalTime) {
+      const movementTime = parseFloat(results.totalTime);
+      const processTimeSec = (parseFloat(params.processTimeMs) || 10) / 1000;
+      const oneWayTime = movementTime + processTimeSec;
+      const totalMassKg = (parseFloat(physicsParams.motorMass) + parseFloat(physicsParams.payloadMass)) / 1000;
+      
+      if (oneWayTime > 0 && totalMassKg > 0) {
+        // Compute average absolute force over movement using trajectory data
+        let forceTimeIntegral = 0;
+        const data = results.data;
+        for (let i = 1; i < data.length; i++) {
+          const dt = data[i].time - data[i - 1].time;
+          const avgAccel = (Math.abs(data[i].acceleration) + Math.abs(data[i - 1].acceleration)) / 2;
+          forceTimeIntegral += avgAccel * totalMassKg * dt;
+        }
+        // During processTime the motor is idle (force = 0), so integral stays the same
+        const avgForce = forceTimeIntegral / oneWayTime;
+        const continuousPct = Math.round(avgForce / specs.nom_force_n * 100);
+        
+        if (continuousPct > 100) {
+          checks.push({
+            type: 'warning',
+            msg: `${t('calculator_continuous_force_usage')} ${continuousPct}%`,
+            param: 'continuous'
+          });
+        } else {
+          checks.push({ type: 'success', msg: `${t('calculator_continuous_force_usage')} ${continuousPct}%`, param: 'continuous' });
+        }
+      }
     }
 
     return checks;
-  }, [selectedProduct, params, physicsParams]);
+  }, [selectedProduct, params, physicsParams, results]);
 
   const hasErrors = validations.some(v => v.type === 'error');
+  const hasWarnings = validations.some(v => v.type === 'warning');
 
   // Check if trajectory was adjusted
   const hasTrajectoryAdjustments = results && (results.isVelocityLimited || results.isJerkMinLimited || results.isTrapezoidal);
@@ -912,6 +946,51 @@ export default function Calculator() {
                     </div>
                   </div>
                 </div>
+
+                {/* Process Time / System Overhead */}
+                <div className="pt-2 border-t border-gray-100">
+                  <Label className="text-xs leading-tight"><span>{t('calculator_process_time_label')}</span><br/><span className="text-gray-400">(ms)</span></Label>
+                  <p className="text-[10px] text-gray-400 mb-1">{t('calculator_process_time_desc')}</p>
+                  <div className="flex items-center gap-0.5 mt-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-6 flex-shrink-0 text-gray-400 hover:text-gray-600"
+                      onClick={() => setParams({...params, processTimeMs: Math.max(5, adjustValue(params.processTimeMs, false))})}
+                    >
+                      <Minus className="w-3 h-3" />
+                    </Button>
+                    <Input 
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*\.?[0-9]*"
+                      value={params.processTimeMs}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^[0-9]*\.?[0-9]*$/.test(val)) {
+                          setParams({...params, processTimeMs: val === '' ? '' : val});
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const num = parseFloat(e.target.value);
+                        setParams({...params, processTimeMs: isNaN(num) || num < 5 ? 5 : num});
+                      }}
+                      onKeyDown={handleInputBlur}
+                      onFocus={handleInputFocus}
+                      className="flex-grow min-w-0"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-6 flex-shrink-0 text-gray-400 hover:text-gray-600"
+                      onClick={() => setParams({...params, processTimeMs: adjustValue(params.processTimeMs, true)})}
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -921,15 +1000,15 @@ export default function Calculator() {
             
             {/* Verification Status - Compact inline */}
             {selectedProduct && (
-               <div className={`px-3 py-2 rounded-lg border flex items-center gap-3 flex-wrap ${hasErrors ? 'bg-red-50 border-red-200' : hasTrajectoryAdjustments ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
-                  {hasErrors ? <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" /> : hasTrajectoryAdjustments ? <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />}
-                  <span className={`text-sm font-medium ${hasErrors ? 'text-red-800' : hasTrajectoryAdjustments ? 'text-amber-800' : 'text-green-800'}`}>
-                     {hasErrors ? t('calculator_config_exceeds') : hasTrajectoryAdjustments ? t('calculator_config_adjusted') : t('calculator_config_valid')}
+               <div className={`px-3 py-2 rounded-lg border flex items-center gap-3 flex-wrap ${hasErrors ? 'bg-red-50 border-red-200' : (hasWarnings || hasTrajectoryAdjustments) ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
+                  {hasErrors ? <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" /> : (hasWarnings || hasTrajectoryAdjustments) ? <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />}
+                  <span className={`text-sm font-medium ${hasErrors ? 'text-red-800' : (hasWarnings || hasTrajectoryAdjustments) ? 'text-amber-800' : 'text-green-800'}`}>
+                     {hasErrors ? t('calculator_config_exceeds') : (hasWarnings || hasTrajectoryAdjustments) ? t('calculator_config_adjusted') : t('calculator_config_valid')}
                   </span>
-                  <div className="flex items-center gap-3 text-xs ml-auto">
+                  <div className="flex items-center gap-3 text-xs ml-auto flex-wrap">
                      {validations.map((v, idx) => (
-                        <span key={idx} className={`flex items-center gap-1 ${v.type === 'error' ? 'text-red-700 font-medium' : 'text-green-600'}`}>
-                           {v.type === 'error' ? <XCircle className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
+                        <span key={idx} className={`flex items-center gap-1 ${v.type === 'error' ? 'text-red-700 font-medium' : v.type === 'warning' ? 'text-amber-700 font-medium' : 'text-green-600'}`}>
+                           {v.type === 'error' ? <XCircle className="w-3 h-3" /> : v.type === 'warning' ? <AlertTriangle className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
                            {v.msg}
                         </span>
                      ))}
@@ -1006,15 +1085,19 @@ export default function Calculator() {
                <CardHeader className="py-3 md:py-6">
                   <CardTitle className="flex justify-between items-center text-base md:text-xl">
                      <span>{t('calculator_motion_analysis')}</span>
-                     <div className="flex gap-3">
-                        <Badge variant="outline" className="text-xs md:text-sm font-normal">
-                           {t('calculator_one_way')}: <span className="font-bold ml-1">{results?.totalTime || '0.000'} s</span>
+                     <div className="flex gap-2 flex-wrap">
+                        <Badge variant="outline" className="text-[10px] md:text-sm font-normal">
+                           {t('calculator_movement_time')}: <span className="font-bold ml-1">{results?.totalTime || '0.000'} s</span>
                         </Badge>
-                        <Badge variant="outline" className="text-xs md:text-sm font-normal bg-blue-50">
-                           {t('calculator_cycle')}: <span className="font-bold ml-1">{results?.totalTime ? (parseFloat(results.totalTime) * 2).toFixed(3) : '0.000'} s</span>
+                        <Badge variant="outline" className="text-[10px] md:text-sm font-normal bg-blue-50">
+                           {t('calculator_one_way')}*: <span className="font-bold ml-1">{results?.totalTime ? (parseFloat(results.totalTime) + (parseFloat(params.processTimeMs) || 10) / 1000).toFixed(3) : '0.000'} s</span>
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px] md:text-sm font-normal bg-indigo-50">
+                           {t('calculator_cycle')}: <span className="font-bold ml-1">{results?.totalTime ? ((parseFloat(results.totalTime) + (parseFloat(params.processTimeMs) || 10) / 1000) * 2).toFixed(3) : '0.000'} s</span>
                         </Badge>
                      </div>
                   </CardTitle>
+                  <p className="text-[10px] text-gray-400 text-right mt-1">{t('calculator_process_time_note')}</p>
                </CardHeader>
                <CardContent className="flex-grow min-h-0 p-1 md:p-6">
                   {results?.data ? (
