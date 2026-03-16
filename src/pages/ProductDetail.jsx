@@ -155,9 +155,9 @@ export default function ProductDetail() {
                   <Info className="w-4 h-4" />
                   <span className="hidden sm:inline">{t('features') || "Features"}</span>
                 </TabsTrigger>
-                <TabsTrigger value="specs" className="flex items-center gap-1">
+                <TabsTrigger value="description" className="flex items-center gap-1">
                   <Settings className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t('specifications') || "Specifications"}</span>
+                  <span className="hidden sm:inline">{t('description_tab') || "Description"}</span>
                 </TabsTrigger>
                 <TabsTrigger value="applications" className="flex items-center gap-1">
                   <FileText className="w-4 h-4" />
@@ -177,33 +177,56 @@ export default function ProductDetail() {
                 </ul>
               </TabsContent>
 
-              <TabsContent value="specs" className="p-6">
-                <h3 className="text-xl font-bold mb-4">{t('technical_specifications') || "Technical Specifications"}</h3>
+              <TabsContent value="description" className="p-6">
+                <h3 className="text-xl font-bold mb-4">{t('description_tab') || "Description"}</h3>
                 
-                {product.technical_specs ? (
-                  <div className="space-y-3">
-                    {product.technical_specs.max_stroke_mm && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">{t('calculator_max_stroke') || "Max Stroke"}</span>
-                        <span className="font-medium">{product.technical_specs.max_stroke_mm} mm</span>
-                      </div>
-                    )}
-                    {product.technical_specs.max_force_n && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">{t('calculator_peak_force') || "Peak Force"}</span>
-                        <span className="font-medium">{product.technical_specs.max_force_n} N</span>
-                      </div>
-                    )}
-                    {product.technical_specs.max_speed_mm_s && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">{t('calculator_max_speed') || "Max Speed"}</span>
-                        <span className="font-medium">{product.technical_specs.max_speed_mm_s} mm/s</span>
-                      </div>
-                    )}
-                    {product.technical_specs.moving_mass_g && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">{t('calculator_motor_mass') || "Moving Mass"}</span>
-                        <span className="font-medium">{product.technical_specs.moving_mass_g} g</span>
+                {product.long_description_key && t(product.long_description_key) ? (
+                  <div className="space-y-4">
+                    <div className="text-gray-700 whitespace-pre-line leading-relaxed">
+                      {t(product.long_description_key)}
+                    </div>
+                    
+                    {product.technical_specs && (
+                      <div className="mt-6 pt-4 border-t">
+                        <h4 className="text-lg font-semibold mb-3">{t('technical_specifications') || "Technical Specifications"}</h4>
+                        <div className="space-y-2">
+                          {product.technical_specs.max_stroke_mm && (
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">{t('calculator_max_stroke') || "Max Stroke"}</span>
+                              <span className="font-medium">{product.technical_specs.max_stroke_mm} mm</span>
+                            </div>
+                          )}
+                          {product.technical_specs.max_force_n && (
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">{t('calculator_peak_force') || "Peak Force"}</span>
+                              <span className="font-medium">{product.technical_specs.max_force_n} N</span>
+                            </div>
+                          )}
+                          {product.technical_specs.nom_force_n && (
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">{t('nom_force') || "Nominal Force"}</span>
+                              <span className="font-medium">{product.technical_specs.nom_force_n} N</span>
+                            </div>
+                          )}
+                          {product.technical_specs.max_speed_mm_s && (
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">{t('calculator_max_speed') || "Max Speed"}</span>
+                              <span className="font-medium">{product.technical_specs.max_speed_mm_s} mm/s</span>
+                            </div>
+                          )}
+                          {product.technical_specs.moving_mass_g && (
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">{t('calculator_motor_mass') || "Moving Mass"}</span>
+                              <span className="font-medium">{product.technical_specs.moving_mass_g} g</span>
+                            </div>
+                          )}
+                          {product.technical_specs.stroke_options_mm && product.technical_specs.stroke_options_mm.length > 0 && (
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">{t('stroke_options') || "Available Stroke Options"}</span>
+                              <span className="font-medium">{product.technical_specs.stroke_options_mm.join(', ')} mm</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -234,12 +257,14 @@ export default function ProductDetail() {
             </Tabs>
             
             <div className="mt-6 grid grid-cols-2 gap-4">
-              <Button 
-                className="bg-blue-600 hover:bg-blue-700" 
-                onClick={() => navigate("/calculator")}
-              >
-                {t('motion_calculator') || "Motion Calculator"}
-              </Button>
+              {product.technical_specs && (
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700" 
+                  onClick={() => navigate("/calculator")}
+                >
+                  {t('motion_calculator') || "Motion Calculator"}
+                </Button>
+              )}
               <Button 
                 variant="outline"
                 onClick={() => navigate("/documentation")}
