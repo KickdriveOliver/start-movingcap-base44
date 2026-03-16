@@ -54,3 +54,4 @@ fattrack = 200
 - on the product detail pages, only display the "Motion Calculator" button if the product has a `technical_specs' group in the  `products.jsx`. E.g:
 https://start.movingcap.de/#/product/pushtrack - don't show "Motion Calculator" button 
 https://start.movingcap.de/#/product/shorttrack - yes, do show "Motion Calculator" button 
+
