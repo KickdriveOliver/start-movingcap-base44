@@ -59,7 +59,7 @@ export const products = [
     application_keys: [],
     technical_specs: {
       max_stroke_mm: 200,
-      max_force_n: 200,
+      max_force_n: 150,
       max_speed_mm_s: 2000,
       moving_mass_g: 800
     },
