@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getCalculatorProducts } from "@/components/data/products";
+import { getCalculatorProducts, CALCULATOR_VERSION } from "@/components/data/products";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -484,19 +484,25 @@ export default function Calculator() {
       const processTimeSec = (parseFloat(params.processTimeMs) || 10) / 1000;
       const oneWayTime = movementTime + processTimeSec;
       const totalMassKg = (parseFloat(physicsParams.motorMass) + parseFloat(physicsParams.payloadMass)) / 1000;
+      const lossForce = specs.loss_force_n || 0;
       
       if (oneWayTime > 0 && totalMassKg > 0) {
-        // Compute average absolute force over movement using trajectory data
-        let forceTimeIntegral = 0;
+        // i²t thermal model: square forces before integrating
+        // Numerator: ∫ (max(|F_accel|, loss_force_n))² dt over movement time only
+        // Motor is in standstill during process time (cooling down, zero losses)
+        // acceleration data is in µm/s² (internal units), divide by 1e6 to get m/s²
+        let numerator = 0;
         const data = results.data;
         for (let i = 1; i < data.length; i++) {
           const dt = data[i].time - data[i - 1].time;
-          const avgAccel = (Math.abs(data[i].acceleration) + Math.abs(data[i - 1].acceleration)) / 2;
-          forceTimeIntegral += avgAccel * totalMassKg * dt;
+          const force1 = Math.max(Math.abs(data[i - 1].acceleration) / 1000000 * totalMassKg, lossForce);
+          const force2 = Math.max(Math.abs(data[i].acceleration) / 1000000 * totalMassKg, lossForce);
+          numerator += (force1 * force1 + force2 * force2) / 2 * dt;
         }
-        // During processTime the motor is idle (force = 0), so integral stays the same
-        const avgForce = forceTimeIntegral / oneWayTime;
-        const continuousPct = Math.round(avgForce / specs.nom_force_n * 100);
+
+        // Denominator: nom_force_n² * one-way time
+        const denominator = specs.nom_force_n * specs.nom_force_n * oneWayTime;
+        const continuousPct = Math.round(numerator / denominator * 100);
         
         if (continuousPct > 100) {
           checks.push({
@@ -779,7 +785,16 @@ export default function Calculator() {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label className="text-xs leading-tight"><span>{t('calculator_distance_label')}</span><br/><span className="text-gray-400">(mm)</span></Label>
-                    <div className="relative mt-1">
+                    <div className="flex items-center gap-0.5 mt-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-6 flex-shrink-0 text-gray-400 hover:text-gray-600"
+                        onClick={() => setParams({...params, distanceMm: adjustValue(params.distanceMm, false)})}
+                      >
+                        <Minus className="w-3 h-3" />
+                      </Button>
                       <Input 
                          type="text"
                          inputMode="decimal"
@@ -797,9 +812,17 @@ export default function Calculator() {
                          }}
                          onKeyDown={handleInputBlur}
                          onFocus={handleInputFocus}
-                         className={`pl-8 ${validations.find(v => v.param === 'distance' && v.type === 'error') ? 'border-red-300 bg-red-50' : ''}`}
+                         className={`flex-grow min-w-0 ${validations.find(v => v.param === 'distance' && v.type === 'error') ? 'border-red-300 bg-red-50' : ''}`}
                       />
-                      <MoveHorizontal className="w-3.5 h-3.5 absolute left-2.5 top-3 text-gray-400" />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-6 flex-shrink-0 text-gray-400 hover:text-gray-600"
+                        onClick={() => setParams({...params, distanceMm: adjustValue(params.distanceMm, true)})}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
                     </div>
                   </div>
                   <div>
@@ -947,48 +970,54 @@ export default function Calculator() {
                   </div>
                 </div>
 
-                {/* Process Time / System Overhead */}
+                {/* Dwell Time */}
                 <div className="pt-2 border-t border-gray-100">
-                  <Label className="text-xs leading-tight"><span>{t('calculator_process_time_label')}</span><br/><span className="text-gray-400">(ms)</span></Label>
-                  <p className="text-[10px] text-gray-400 mb-1">{t('calculator_process_time_desc')}</p>
-                  <div className="flex items-center gap-0.5 mt-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-10 w-6 flex-shrink-0 text-gray-400 hover:text-gray-600"
-                      onClick={() => setParams({...params, processTimeMs: Math.max(5, adjustValue(params.processTimeMs, false))})}
-                    >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                    <Input 
-                      type="text"
-                      inputMode="decimal"
-                      pattern="[0-9]*\.?[0-9]*"
-                      value={params.processTimeMs}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === '' || /^[0-9]*\.?[0-9]*$/.test(val)) {
-                          setParams({...params, processTimeMs: val === '' ? '' : val});
-                        }
-                      }}
-                      onBlur={(e) => {
-                        const num = parseFloat(e.target.value);
-                        setParams({...params, processTimeMs: isNaN(num) || num < 5 ? 5 : num});
-                      }}
-                      onKeyDown={handleInputBlur}
-                      onFocus={handleInputFocus}
-                      className="flex-grow min-w-0"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-10 w-6 flex-shrink-0 text-gray-400 hover:text-gray-600"
-                      onClick={() => setParams({...params, processTimeMs: adjustValue(params.processTimeMs, true)})}
-                    >
-                      <Plus className="w-3 h-3" />
-                    </Button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs leading-tight"><span>{t('calculator_process_time_label')}</span><br/><span className="text-gray-400">(ms)</span></Label>
+                      <div className="flex items-center gap-0.5 mt-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-10 w-6 flex-shrink-0 text-gray-400 hover:text-gray-600"
+                          onClick={() => setParams({...params, processTimeMs: Math.max(5, adjustValue(params.processTimeMs, false))})}
+                        >
+                          <Minus className="w-3 h-3" />
+                        </Button>
+                        <Input 
+                          type="text"
+                          inputMode="decimal"
+                          pattern="[0-9]*\.?[0-9]*"
+                          value={params.processTimeMs}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === '' || /^[0-9]*\.?[0-9]*$/.test(val)) {
+                              setParams({...params, processTimeMs: val === '' ? '' : val});
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const num = parseFloat(e.target.value);
+                            setParams({...params, processTimeMs: isNaN(num) || num < 5 ? 5 : num});
+                          }}
+                          onKeyDown={handleInputBlur}
+                          onFocus={handleInputFocus}
+                          className="flex-grow min-w-0"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-10 w-6 flex-shrink-0 text-gray-400 hover:text-gray-600"
+                          onClick={() => setParams({...params, processTimeMs: adjustValue(params.processTimeMs, true)})}
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-end">
+                      <p className="text-[10px] text-gray-400 pb-2 leading-relaxed">{t('calculator_process_time_desc')}</p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -1163,6 +1192,11 @@ export default function Calculator() {
             </Card>
           </div>
         </div>
+
+        {/* Version footer */}
+        <p className="text-[10px] text-gray-300 text-right mt-6 select-all">
+          Calculator {CALCULATOR_VERSION}
+        </p>
       </motion.div>
     </div>
   );
