@@ -81,3 +81,4 @@ Resume file: .planning/phases/03-build-pwa-deployment/03-UAT.md
 |------|------|-----------|--------|
 | 2026-03-15 | Fix homepage `Learn More` product links (`/product/undefined`) | `.planning/quick/001-fix-homepage-learn-more-links` | Completed |
 | 2026-03-15 | Improve hero wording (`hero_title` Swap) | `.planning/quick/002-improve-hero-wording` | Completed |
+| 2026-03-16 | Extend product data: long descriptions, technical specs, conditional calculator button | `.planning/quick/003-extend-product-data` | Completed |
