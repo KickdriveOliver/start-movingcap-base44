@@ -563,13 +563,18 @@ export default function Calculator() {
                       <div className="flex justify-between">
                          <span>{t('calculator_peak_force')}</span> <span className="font-medium">{specs.max_force_n} N</span>
                       </div>
+                      {specs.nom_force_n && (
+                        <div className="flex justify-between">
+                           <span>{t('nom_force')}</span> <span className="font-medium">{specs.nom_force_n} N</span>
+                        </div>
+                      )}
                       <div className="flex justify-between">
                          <span>{t('calculator_max_speed')}</span> <span className="font-medium">{specs.max_speed_mm_s} mm/s</span>
                       </div>
                     </div>
                     {/* Mobile simplified specs */}
                     <div className="mt-1 text-xs text-gray-500 md:hidden">
-                      {specs.max_stroke_mm}mm | {specs.max_force_n}N
+                      {specs.max_stroke_mm}mm | {specs.max_force_n}N{specs.nom_force_n ? ` | ${specs.nom_force_n}N nom` : ''}
                     </div>
                   </div>
                   {isSelected && (
