@@ -478,15 +478,16 @@ export default function Calculator() {
       checks.push({ type: 'success', msg: `${t('calculator_peak_force_usage')} ${Math.round(requiredForce/specs.max_force_n * 100)}%`, param: 'force' });
     }
 
-    // Continuous duty check (average force over one-way time vs nominal force)
+    // Continuous duty check (movement i²t vs ED-adjusted nominal-force i²t over one-way time)
     if (specs.nom_force_n && results?.data && results?.totalTime) {
       const movementTime = parseFloat(results.totalTime);
       const processTimeSec = (parseFloat(params.processTimeMs) || 10) / 1000;
       const oneWayTime = movementTime + processTimeSec;
       const totalMassKg = (parseFloat(physicsParams.motorMass) + parseFloat(physicsParams.payloadMass)) / 1000;
       const lossForce = specs.loss_force_n || 0;
+      const dutyCycleFactor = (specs.duty_cycle_ED || 100) / 100;
       
-      if (oneWayTime > 0 && totalMassKg > 0) {
+      if (oneWayTime > 0 && totalMassKg > 0 && dutyCycleFactor > 0) {
         // i²t thermal model: square forces before integrating
         // Numerator: ∫ (max(|F_accel|, loss_force_n))² dt over movement time only
         // Motor is in standstill during process time (cooling down, zero losses)
@@ -500,8 +501,8 @@ export default function Calculator() {
           numerator += (force1 * force1 + force2 * force2) / 2 * dt;
         }
 
-        // Denominator: nom_force_n² * one-way time
-        const denominator = specs.nom_force_n * specs.nom_force_n * oneWayTime;
+        // Denominator: nom_force_n² * one-way time * ED factor
+        const denominator = specs.nom_force_n * specs.nom_force_n * oneWayTime * dutyCycleFactor;
         const continuousPct = Math.round(numerator / denominator * 100);
         
         if (continuousPct > 100) {

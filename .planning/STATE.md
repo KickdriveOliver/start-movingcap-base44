@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 Phase: 3 of 3 (Build, PWA & Deployment)
 Plan: 3 of 3 in current phase
 Status: Completed — Phase 3 executed and verified
-Last activity: 2026-03-13 — Completed Phase 3 UAT (`03-UAT.md`) with 5/5 tests passing
+Last activity: 2026-04-23 — Completed quick task 7 (ED-adjusted continuous duty calculator)
 
 Progress: [██████████] 100%
 
@@ -85,3 +85,4 @@ Resume file: .planning/phases/03-build-pwa-deployment/03-UAT.md
 | 2026-03-16 | Show nom_force_n in calculator drive selection tiles | `.planning/quick/004-nom-force-calculator-tiles` | Completed |
 | 2026-03-16 | Improve motion calculator: process time, 3-value timing, continuous duty | `.planning/quick/005-improve-motion-calculator` | Completed |
 | 2026-03-16 | Fix force warning displaying unrealistically high value (string concat bug) | `.planning/quick/006-fix-force-warning-value` | Completed |
+| 2026-04-23 | Improve motion calculator continuous duty with ED duty cycle | `.planning/quick/7-improve-motion-calculator-continuous-dut` | Completed |
