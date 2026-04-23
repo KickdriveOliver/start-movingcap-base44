@@ -323,26 +323,28 @@ export default function Calculator() {
     }
   }, [selectedProduct]);
 
-  // 3. Calculate Max Possible Acceleration (Physics)
+  // 3. Estimate usable acceleration for a standard S-curve move
   useEffect(() => {
-    const maxForce = parseFloat(physicsParams.maxForce) || 0;
+    const peakForce = parseFloat(physicsParams.maxForce) || 0;
+    const nominalForce = parseFloat(selectedProduct?.technical_specs?.nom_force_n) || 0;
     const motorMass = parseFloat(physicsParams.motorMass) || 0;
     const payloadMass = parseFloat(physicsParams.payloadMass) || 0;
     const totalMassKg = (motorMass + payloadMass) / 1000;
+    const estimatedForce = nominalForce > 0 ? (peakForce + nominalForce) / 2 : peakForce;
 
-    if (totalMassKg <= 0 || maxForce <= 0) {
+    if (totalMassKg <= 0 || estimatedForce <= 0) {
       setCalculatedAccel({ maxAccelMicrometers: Infinity, maxAccelMeters: Infinity });
       return;
     }
 
-    const maxAcceleration = maxForce / totalMassKg;
+    const maxAcceleration = estimatedForce / totalMassKg;
     const maxAccelMicrometers = maxAcceleration * 1000000;
 
     setCalculatedAccel({
       maxAccelMicrometers,
       maxAccelMeters: maxAcceleration
     });
-  }, [physicsParams]);
+  }, [physicsParams, selectedProduct]);
 
   // 4. Auto-update Accel/Jerk if "Apply to profile" is checked
   useEffect(() => {

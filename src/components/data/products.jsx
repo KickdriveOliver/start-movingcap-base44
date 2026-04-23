@@ -1,5 +1,5 @@
 // Calculator & product data version — update when specs or formulas change
-export const CALCULATOR_VERSION = 'v0.2 — 2026-04-23';
+export const CALCULATOR_VERSION = 'v0.3 — 2026-04-23';
 
 // Static product data - exported from database
 export const products = [
