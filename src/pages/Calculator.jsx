@@ -337,7 +337,7 @@ export default function Calculator() {
       return;
     }
 
-    const maxAcceleration = estimatedForce / totalMassKg;
+    const maxAcceleration = Math.round(estimatedForce / totalMassKg);
     const maxAccelMicrometers = maxAcceleration * 1000000;
 
     setCalculatedAccel({
@@ -756,7 +756,7 @@ export default function Calculator() {
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs font-medium text-indigo-800">{t('calculator_phys_max_accel')}</span>
                     <span className="text-lg font-bold text-indigo-600">
-                       {calculatedAccel?.maxAccelMeters?.toFixed(1) || 0} m/s²
+                       {calculatedAccel?.maxAccelMeters?.toFixed(0) || 0} m/s²
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
