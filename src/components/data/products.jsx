@@ -99,7 +99,7 @@ export const products = [
       max_speed_mm_s: 1800,
       moving_mass_g: 450,
       nom_force_n: 9,
-      duty_cycle_ED: 50,
+      duty_cycle_ED: 25,
       loss_force_n: 2,
       stroke_options_mm: [46]
     },
